@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.2",
+    "@heroicons/react": "^2.2.0",
     "localforage": "^1.10.0",
     "match-sorter": "^8.0.1",
     "react": "^19.1.0",
