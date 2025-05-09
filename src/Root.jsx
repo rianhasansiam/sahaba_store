@@ -11,6 +11,7 @@ import Wishlist from "./Page/Wishlist";
 import Login from "./Page/user/Login";
 import Register from "./Page/user/Register";
 
+
 const Root = createBrowserRouter([
   {
     path: "/",

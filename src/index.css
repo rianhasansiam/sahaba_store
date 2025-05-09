@@ -87,7 +87,12 @@ img {
 }
 
 
+.register__label {
+  position: absolute;
 
+  font-weight: var(--font-semi-bold);
+  transition: transform .4s, font-size .4s, color .4s;
+}
 
 
 .login__button {
@@ -120,6 +125,10 @@ img {
   transform: translateY(-12px);
   font-size: var(--tiny-font-size);
 }
+.login__input:focus ~ .register__label {
+  transform: translateY(-12px);
+  font-size: var(--tiny-font-size);
+}
 
 .login__input:focus {
   padding-block: 2rem 1rem;
@@ -127,6 +136,10 @@ img {
 
 /* Input focus sticky top label */
 .login__input:not(:placeholder-shown).login__input:not(:focus) ~ .login__label {
+  transform: translateY(-12px);
+  font-size: var(--tiny-font-size);
+}
+.login__input:not(:placeholder-shown).login__input:not(:focus) ~ .register__label {
   transform: translateY(-12px);
   font-size: var(--tiny-font-size);
 }
@@ -141,6 +154,10 @@ img {
 }
 
 .login__input:focus ~ .login__label,
+.login__input:focus ~ .login__icon {
+  color: black;
+}
+.login__input:focus ~ .register__label,
 .login__input:focus ~ .login__icon {
   color: black;
 }

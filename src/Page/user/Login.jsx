@@ -47,12 +47,12 @@ const Login = () => {
             </form>
 
             <div className="login__social">
-              <p className="login__social-title">Or login with</p>
+              <p className="text-center font-semibold">Or login with</p>
 
-              <div className="login__social-links">
-                <Link to="#" className="login__social-link">
+              <div className="">
+                <Link to="#" className=" login__button !bg-gray-200 !py-4">
                   {/* Use the imported image paths */}
-                  <img src="https://img.icons8.com/?size=100&id=17949&format=png&color=000000" alt="Google login" className="login__social-img" />
+                  <img  src="https://img.icons8.com/?size=100&id=17949&format=png&color=000000" alt="Google login" className="w-10" />
                 </Link>
 
                 {/* <Link to="#" className="login__social-link">
@@ -65,9 +65,9 @@ const Login = () => {
               </div>
             </div>
 
-            <p className="login__switch">
-              Don't have an account? 
-              <button >Create Account</button>
+            <p className="text-right">
+              Don't have an account?  
+              <Link to="/register" className='underline hover:text-[#167389] hover:font-semibold ml-1' > Create Account</Link>
             </p>
           </div>
         </div>
