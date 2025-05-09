@@ -1,6 +1,9 @@
 import { Outlet } from "react-router-dom"
 import Navbar from "./Conponents/Navbar"
 import { Footer } from "./Conponents/Footer"
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
+
 
 
 function App() {
@@ -14,6 +17,7 @@ function App() {
 
    </div>
    <Footer></Footer>
+   <ToastContainer />
     </>
   )
 }
