@@ -1,7 +1,14 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { Link, NavLink } from 'react-router-dom'
+import { contextData } from '../Contex'
+
 
 const Navbar = () => {
+
+
+  const {userData,signoutHandle}=useContext(contextData)
+
+
   return (
     <div className='bg-[#167389]'>
 
@@ -73,10 +80,10 @@ const Navbar = () => {
 
 
 
-  <div className="navbar-end text-white flex gap-5 text-xl">
+  <div className="navbar-end text-white flex gap-5 text-xl items-center">
     <Link to="/wishlist"  className='block '><i className="fa-solid fa-heart"></i></Link>
     <Link to="/addtocart" className='block '><i className="fa-solid fa-cart-shopping"></i></Link>
-    <Link to="/login" className='block '><i className="fa-solid fa-user"></i></Link>
+    {userData? <button onClick={signoutHandle} className='  text-lg  btn flex hover:bg-gray-300 '>Logout</button> :<Link to="/login" className='text-lg  btn flex hover:bg-gray-300 '>Login</Link>}
 </div>
 
 </div>
