@@ -10,6 +10,7 @@ import Wishlist from "./Page/Wishlist";
 
 import Login from "./Page/user/Login";
 import Register from "./Page/user/Register";
+import AddToCart from "./Page/AddToCart";
 
 
 const Root = createBrowserRouter([
@@ -45,6 +46,10 @@ const Root = createBrowserRouter([
       {
         path: '/register',
         element: <Register></Register>
+      },
+      {
+        path: '/addtocart',
+        element: <AddToCart></AddToCart>
       },
     ]
   },

@@ -1,5 +1,5 @@
 import React from 'react'
-import { NavLink } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 
 const Navbar = () => {
   return (
@@ -74,13 +74,12 @@ const Navbar = () => {
 
 
   <div className="navbar-end text-white flex gap-5 text-xl">
-    <button className='block '><i className="fa-solid fa-heart"></i></button>
-    <button className='block '><i className="fa-solid fa-cart-shopping"></i></button>
-    <button className='block '><i className="fa-solid fa-user"></i></button>
-  </div>
+    <Link to="/wishlist"  className='block '><i className="fa-solid fa-heart"></i></Link>
+    <Link to="/addtocart" className='block '><i className="fa-solid fa-cart-shopping"></i></Link>
+    <Link to="/login" className='block '><i className="fa-solid fa-user"></i></Link>
 </div>
 
-
+</div>
 
 
 {/* seachbar here */}
