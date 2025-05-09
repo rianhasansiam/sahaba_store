@@ -2,7 +2,7 @@ import React from 'react'
 
 export const Footer = () => {
   return (
-   <footer className="bg-white text-black border-t mt-16">
+   <footer className="bg-white text-black border-t ">
   <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-5 gap-8">
     
     {/* CONTACT */}
@@ -69,13 +69,6 @@ export const Footer = () => {
 
   {/* PAYMENT & COPYRIGHT */}
   <div className="border-t py-6 text-center">
-    <div className="flex flex-wrap justify-center gap-4 mb-4">
-      <img src="/bcommerce.png" alt="bcommerce" className="h-10" />
-      <img src="/bkash.png" alt="bkash" className="h-10" />
-      <img src="/nagad.png" alt="nagad" className="h-10" />
-      <img src="/onfield.png" alt="onfield" className="h-10" />
-      <img src="/ecab.png" alt="ecab" className="h-10" />
-    </div>
     <p className="text-sm">© 2025 Skybuybd - All Rights Reserved</p>
   </div>
 </footer>

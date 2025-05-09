@@ -7,6 +7,10 @@ import Two from "./Page/AllProduct/Two";
 import Contact from "./Page/Contact";
 import Wishlist from "./Page/Wishlist";
 
+
+import Login from "./Page/user/Login";
+import Register from "./Page/user/Register";
+
 const Root = createBrowserRouter([
   {
     path: "/",
@@ -32,6 +36,14 @@ const Root = createBrowserRouter([
       {
         path: '/wishlist',
         element: <Wishlist></Wishlist>
+      },
+      {
+        path: '/login',
+        element: <Login></Login>
+      },
+      {
+        path: '/register',
+        element: <Register></Register>
       },
     ]
   },
