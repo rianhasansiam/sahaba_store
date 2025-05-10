@@ -139,7 +139,7 @@ const Adminpage = () => {
           </h1>
           <button
             onClick={toggleMenu}
-            className="text-2xl text-[#ff5202] focus:outline-none"
+            className="text-2xl text-[#167389] focus:outline-none"
             aria-label="Open menu"
           >
             ☰

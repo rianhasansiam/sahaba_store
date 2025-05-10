@@ -6,7 +6,7 @@ export const useDeleteData = (key) => {
 
   return useMutation({
     mutationFn: async (id) => {
-      const res = await api.delete(`/${key}/${id}`);
+      const res = await api.delete(`${key}/${id}`);
       return res.data;
     },
     onSuccess: () => {
