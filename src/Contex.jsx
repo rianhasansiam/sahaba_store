@@ -9,10 +9,10 @@ export const contextData = createContext();
 const Contex = ({ children }) => {
   // State to store the current user
   const [userData, setUserData] = useState(null);
+  console.log(userData)
 
   // State to handle loading state
   const [loading, setLoading] = useState(true);
-
 
 
 
@@ -102,10 +102,11 @@ const Contex = ({ children }) => {
 
 
 
-
+const [logoutLoading, setLogoutLoading]= useState(false)
 
   // Function to handle user sign-out
   const signoutHandle = () => {
+setLogoutLoading(true)
     signOut(auth)
       .then(() => {
         // Show success message
@@ -118,6 +119,7 @@ const Contex = ({ children }) => {
 
         // Clear user data after sign out
         setUserData(null);
+        setLogoutLoading(false)
       })
       .catch((error) => {
         // Handle any error during sign out (optional)
@@ -131,6 +133,7 @@ const Contex = ({ children }) => {
     userData,
     loading,
     signoutHandle,
+    logoutLoading
   };
 
   return (

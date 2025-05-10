@@ -6,7 +6,7 @@ import { contextData } from '../Contex'
 const Navbar = () => {
 
 
-  const {userData,signoutHandle}=useContext(contextData)
+  const {userData,signoutHandle,logoutLoading}=useContext(contextData)
 
 
   return (
@@ -83,7 +83,7 @@ const Navbar = () => {
   <div className="navbar-end text-white flex gap-5 text-xl items-center">
     <Link to="/wishlist"  className='block '><i className="fa-solid fa-heart"></i></Link>
     <Link to="/addtocart" className='block '><i className="fa-solid fa-cart-shopping"></i></Link>
-    {userData? <button onClick={signoutHandle} className='  text-lg  btn flex hover:bg-gray-300 '>Logout</button> :<Link to="/login" className='text-lg  btn flex hover:bg-gray-300 '>Login</Link>}
+    {userData? <button onClick={signoutHandle} className='  text-lg  btn flex hover:bg-gray-300 '>{logoutLoading?"Logouting..":"Logout"}</button> :<Link to="/login" className='text-lg  btn flex hover:bg-gray-300 '>Login</Link>}
 </div>
 
 </div>
