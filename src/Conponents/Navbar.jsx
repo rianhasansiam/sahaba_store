@@ -47,6 +47,7 @@ const Navbar = () => {
       </li>
       <li><NavLink to="/wishlist">Wishlist</NavLink></li>
       <li><NavLink to="/contact" >Contact</NavLink></li>
+      <li><NavLink to="/adminpage" >Admin Pannel</NavLink></li>
 
 
 
@@ -72,6 +73,7 @@ const Navbar = () => {
       </li>
       <li><NavLink to="/wishlist">Wishlist</NavLink></li>
       <li><NavLink to="/contact" >Contact</NavLink></li>
+      <li><NavLink to="/adminpage" >Admin Pannel</NavLink></li>
 
 
     </ul>

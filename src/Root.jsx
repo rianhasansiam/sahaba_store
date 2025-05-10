@@ -11,6 +11,12 @@ import Wishlist from "./Page/Wishlist";
 import Login from "./Page/user/Login";
 import Register from "./Page/user/Register";
 import AddToCart from "./Page/AddToCart";
+import Adminpage from "./Page/AdminPannel/Adminpage";
+import Dashboard from "./Page/AdminPannel/Dashboard";
+import AllUsers from "./Page/AdminPannel/AllUsers";
+import AllOrders from "./Page/AdminPannel/AllOrders";
+import AllCategories from "./Page/AdminPannel/AllCategories";
+
 
 
 const Root = createBrowserRouter([
@@ -51,7 +57,26 @@ const Root = createBrowserRouter([
         path: '/addtocart',
         element: <AddToCart></AddToCart>
       },
+
+
+
+      {
+  path: '/adminpage',
+  element: <Adminpage />,
+  children: [
+    { path: 'dashboard', element: <Dashboard></Dashboard> },
+    { path: 'allusers', element: <AllUsers></AllUsers> },
+    { path: 'allorders', element: <AllOrders ></AllOrders>},
+    { path: 'allcategories', element: <AllCategories></AllCategories> },
+  ]
+},
+
+
+
+
     ]
   },
+
+  
 ]);
 export default Root
