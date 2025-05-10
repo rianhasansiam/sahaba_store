@@ -9,7 +9,7 @@ export const contextData = createContext();
 const Contex = ({ children }) => {
   // State to store the current user
   const [userData, setUserData] = useState(null);
-  console.log(userData)
+ 
 
   // State to handle loading state
   const [loading, setLoading] = useState(true);
