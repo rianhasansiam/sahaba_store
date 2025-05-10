@@ -106,6 +106,20 @@ const Adminpage = () => {
             </li>
             <li>
               <NavLink
+                to="/adminpage/allproducts"
+                className={({ isActive }) =>
+                  `block py-3 px-4 rounded-lg transition-colors ${
+                    isActive
+                      ? 'bg-white text-[#167389] font-bold'
+                      : 'hover:bg-white/10 text-white'
+                  }`
+                }
+              >
+                All Products
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
                 to="/adminpage/allorders"
                 className={({ isActive }) =>
                   `block py-3 px-4 rounded-lg transition-colors ${

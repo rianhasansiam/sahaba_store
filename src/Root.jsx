@@ -16,6 +16,7 @@ import Dashboard from "./Page/AdminPannel/Dashboard";
 import AllUsers from "./Page/AdminPannel/AllUsers";
 import AllOrders from "./Page/AdminPannel/AllOrders";
 import AllCategories from "./Page/AdminPannel/AllCategories";
+import AllProducts from "./Page/AdminPannel/AllProducts";
 
 
 
@@ -68,6 +69,7 @@ const Root = createBrowserRouter([
     { path: 'allusers', element: <AllUsers></AllUsers> },
     { path: 'allorders', element: <AllOrders ></AllOrders>},
     { path: 'allcategories', element: <AllCategories></AllCategories> },
+    { path: 'allproducts', element: <AllProducts></AllProducts>},
   ]
 },
 

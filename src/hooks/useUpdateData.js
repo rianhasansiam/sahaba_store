@@ -6,7 +6,7 @@ export const useUpdateData = (key) => {
 
   return useMutation({
     mutationFn: async ({ id, data }) => {
-      const res = await api.put(`/${key}/${id}`, data);
+      const res = await api.put(`${key}/${id}`, data);
       return res.data;
     },
     onSuccess: () => {
