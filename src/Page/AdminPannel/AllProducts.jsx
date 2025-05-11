@@ -14,7 +14,8 @@ const AllProducts = () => {
     description: '',
     price: '',
     category: '',
-    image: ''
+    image: '',
+    shortDescription:''
   });
   
   const [showModal, setShowModal] = useState(false);
@@ -100,7 +101,7 @@ const handleImageUpload = async (e) => {
     const payload = {
       ...productForm,
       price: parseFloat(productForm.price) || 0,
-      availableAmount: parseInt(productForm.availableAmount) || 0,
+      availableAmount: productForm.availableAmount || 0,
       category: productForm.category || null,
       image: productForm.image || null
     };
@@ -137,11 +138,12 @@ const handleImageUpload = async (e) => {
     setProductForm({
       productId: product.productId,
       name: product.name,
-      availableAmount: product.availableAmount.toString(),
+      availableAmount: product.availableAmount,
       description: product.description,
       price: product.price.toString(),
       category: product.category?._id || product.category || '',
-      image: product.image || ''
+      image: product.image || '',
+      shortDescription: product.shortDescription || ''
     });
     setEditMode(true);
     setEditId(product._id);
@@ -180,7 +182,8 @@ const handleImageUpload = async (e) => {
       description: '',
       price: '',
       category: '',
-      image: ''
+      image: '',
+      shortDescription: ''
     });
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -293,16 +296,31 @@ const handleImageUpload = async (e) => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Available Amount
+                  Available Product
                 </label>
                 <input
-                  type="number"
+                  type="text"
                   name="availableAmount"
                   value={productForm.availableAmount}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border rounded-md"
                   placeholder="0"
-                  min="0"
+                  
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                 Short Description
+                </label>
+                <input
+                  type="text"
+                  name="shortDescription"
+                  value={productForm.shortDescription}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border rounded-md"
+                  placeholder="Short Description...."
+                 
                 />
               </div>
 
