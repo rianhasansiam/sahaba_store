@@ -1,58 +1,63 @@
-import React from 'react';
-import { ChevronRightIcon, XMarkIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { useContext, useEffect } from "react";
+import { contextData } from "../Contex";
+import { useFetchData } from "../hooks/useFetchData";
+import { ArrowLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import AddtocartProduct from "../Conponents/AddtocartProduct";
+import { useDeleteData } from "../hooks/useDeleteData";
+
+
+
 
 const AddToCart = () => {
-  const cartItems = [
-    {
-      id: 1,
-      name: "Slim Fit Casual Shirt",
-      description: "Button-Down Collar & Placket...",
-      size: "XL",
-      color: "Marron",
-      price: 85,
-      originalPrice: 92,
-      quantity: 1,
-      image: "https://via.placeholder.com/150"
-    },
-    {
-      id: 2,
-      name: "Printed Straight Kurtas",
-      description: "Digital Printed With Yoke Embroidered...",
-      size: "XL",
-      color: "Green",
-      price: 68,
-      originalPrice: 76,
-      quantity: 1,
-      image: "https://via.placeholder.com/150"
-    }
-  ];
+  const { userData } = useContext(contextData);
 
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  // Fetch cart items from the API
+  const { data, isLoading, error, refetch } = useFetchData(
+    "cartItems",
+    `/addtocart-list?email=${userData?.email}`
+  );
+
+
+  useEffect(()=>{
+
+refetch()
+
+  },[])
+  // Check if data exists and ensure it's an array of cartItems
+  const cartItems = Array.isArray(data?.cartItems) ? data.cartItems : [];
+
+  // Use delete hook for cart item removal
+  const { mutate: deleteCartItem } = useDeleteData("cartItems");
+
+  // Handle loading and error states
+  if (isLoading) return <p>Loading cart...</p>;
+  if (error) return <p>Error: {error.message}</p>;
+
+  // Calculate subtotal, discount, and total
+  const subtotal = cartItems.reduce((sum, item) => {
+    const quantity = item.quantity || 1;
+    const price = typeof item.price === "number" ? item.price : Number(item.price) || 0;
+    return sum + (price * quantity);
+  }, 0);
+
   const discount = 35.52;
   const total = subtotal - discount;
+
+  const handleDelete = (id) => {
+    deleteCartItem(id); // Remove item from cart using the delete mutation
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">HOPY</h1>
-          <nav className="hidden md:flex space-x-6">
-            <a href="#" className="text-gray-600 hover:text-[#167389]">Home</a>
-            <a href="#" className="text-gray-600 hover:text-[#167389]">Best Seller</a>
-            <a href="#" className="text-gray-600 hover:text-[#167389]">New Arrival</a>
-            <a href="#" className="text-gray-600 hover:text-[#167389]">Collection</a>
-            <a href="#" className="text-gray-600 hover:text-[#167389]">Hi, John</a>
-          </nav>
-        </div>
+      
 
         {/* Breadcrumb */}
         <div className="flex items-center text-sm text-gray-500 mb-8">
           <span className="text-[#167389]">Cart</span>
           <ChevronRightIcon className="h-4 w-4 mx-2" />
           <span>Checkout</span>
-          <ChevronRightIcon className="h-4 w-4 mx-2" />
-          <span>Payment</span>
+         
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -63,54 +68,12 @@ const AddToCart = () => {
               
               <div className="divide-y divide-gray-200">
                 {cartItems.map((item) => (
-                  <div key={item.id} className="py-6 flex flex-col sm:flex-row">
-                    <div className="flex-shrink-0 mb-4 sm:mb-0">
-                      <img
-                        className="h-32 w-32 rounded-md object-cover"
-                        src={item.image}
-                        alt={item.name}
-                      />
-                    </div>
-                    <div className="ml-0 sm:ml-4 flex-1">
-                      <div className="flex justify-between">
-                        <div>
-                          <h3 className="text-lg font-medium text-gray-900">{item.name}</h3>
-                          <p className="text-gray-500 text-sm">{item.description}</p>
-                          <div className="mt-2 text-sm">
-                            <span className="text-gray-600">Size: {item.size}</span>
-                            <span className="mx-2">|</span>
-                            <span className="text-gray-600">Color: {item.color}</span>
-                          </div>
-                        </div>
-                        <button className="text-gray-400 hover:text-red-500">
-                          <XMarkIcon className="h-5 w-5" />
-                        </button>
-                      </div>
-                      
-                      <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                        <div className="flex items-center mb-4 sm:mb-0">
-                          <button className="border border-gray-300 rounded-l-md px-3 py-1">
-                            -
-                          </button>
-                          <span className="border-t border-b border-gray-300 px-4 py-1">
-                            {item.quantity}
-                          </span>
-                          <button className="border border-gray-300 rounded-r-md px-3 py-1">
-                            +
-                          </button>
-                        </div>
-                        
-                        <div className="flex items-center">
-                          <span className="text-lg font-bold">${item.price.toFixed(2)}</span>
-                          {item.originalPrice && (
-                            <span className="ml-2 text-sm text-gray-500 line-through">
-                              ${item.originalPrice.toFixed(2)}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <AddtocartProduct 
+                    item={item} 
+                    key={item._id} 
+                    refetch={refetch}
+                    onDelete={() => handleDelete(item._id)} // Handle delete
+                  />
                 ))}
               </div>
               

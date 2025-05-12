@@ -3,8 +3,9 @@ import axios from "axios";
 import { HeartIcon } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
 import { contextData } from "../Contex";
-import api from "../hooks/api";
+
 import { toast } from "react-toastify";
+import api from "../hooks/api";
 
 const ProductCard = ({ products, categoryName }) => {
   const { userData } = useContext(contextData);

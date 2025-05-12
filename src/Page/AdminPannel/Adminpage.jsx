@@ -137,7 +137,7 @@ const Adminpage = () => {
 
         {/* Sidebar footer */}
         <div className="absolute bottom-0 w-full p-4 border-t border-white/20">
-          <p className="text-white/70 text-sm">v1.0.0</p>
+          <p className="text-white/70 text-sm">@rianhasansiam</p>
         </div>
       </aside>
 
