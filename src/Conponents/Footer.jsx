@@ -3,6 +3,8 @@ import React from 'react'
 export const Footer = () => {
   return (
    <footer className="bg-white text-black border-t ">
+<hr className='h-1 bg-[#167389]' />
+
   <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-5 gap-8">
     
     {/* CONTACT */}
