@@ -22,9 +22,9 @@ const WishlishtEachcard = ({ id, setreload, reload }) => {
     return <p className="text-center py-4">Loading...</p>;
   }
 
-  if (isError) {
-    return <p className="text-center text-red-500 py-4">Error: {error.message}</p>;
-  }
+  // if (isError) {
+  //   return <p className="text-center text-red-500 py-4">Error: {error.message}</p>;
+  // }
 
 
 

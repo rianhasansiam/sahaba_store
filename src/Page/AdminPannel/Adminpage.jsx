@@ -132,6 +132,20 @@ const Adminpage = () => {
                 All Orders
               </NavLink>
             </li>
+            <li>
+              <NavLink
+                to="/adminpage/cuponcodes"
+                className={({ isActive }) =>
+                  `block py-3 px-4 rounded-lg transition-colors ${
+                    isActive
+                      ? 'bg-white text-[#167389] font-bold'
+                      : 'hover:bg-white/10 text-white'
+                  }`
+                }
+              >
+                Coupon Management
+              </NavLink>
+            </li>
           </ul>
         </nav>
 
@@ -150,6 +164,7 @@ const Adminpage = () => {
             {location.pathname.includes('allusers') && 'User Management'}
             {location.pathname.includes('allcategories') && 'Categories'}
             {location.pathname.includes('allorders') && 'Order Management'}
+            {location.pathname.includes('cuponcodes') && 'Coupon Management'}
           </h1>
           <button
             onClick={toggleMenu}
