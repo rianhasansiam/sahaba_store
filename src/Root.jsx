@@ -18,6 +18,7 @@ import AllOrders from "./Page/AdminPannel/AllOrders";
 import AllCategories from "./Page/AdminPannel/AllCategories";
 import AllProducts from "./Page/AdminPannel/AllProducts";
 import CouponManagement from "./Page/AdminPannel/CouponManagement";
+import AllProdect from "./Page/AllProdect";
 
 
 
@@ -32,13 +33,14 @@ const Root = createBrowserRouter([
         element: <Home></Home>
       },
       {
-        path: '/allproduct/one',
-        element: <One></One>
+        path: '/allproduct',
+        element: <AllProdect></AllProdect>
       },
       {
-        path: '/allproduct/two',
-        element: <Two></Two>
+        path: '/allproduct/:category',
+        element: <AllProdect />
       },
+      
       {
         path: '/contact',
         element: <Contact></Contact>

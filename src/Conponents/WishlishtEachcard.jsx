@@ -25,7 +25,7 @@ const WishlishtEachcard = ({ id, setreload, reload }) => {
   // if (isError) {
   //   return <p className="text-center text-red-500 py-4">Error: {error.message}</p>;
   // }
-
+// console.log(id)
 
 
   // Handle remove to Wishlist
@@ -35,17 +35,45 @@ const WishlishtEachcard = ({ id, setreload, reload }) => {
     }
 
     try {
-        const response = await api.put("/remove-from-wishlist", {
+      const response = await api.put("/remove-from-wishlist", {
         email: userData.email,
         productId: productId,
       });
-    setreload(!reload)
+      // Remove from localStorage as well
+      let wishlist = JSON.parse(localStorage.getItem("wishlist"));
+      if (Array.isArray(wishlist)) {
+        wishlist = wishlist.filter(id => id !== productId);
+        localStorage.setItem("wishlist", JSON.stringify(wishlist));
+      } else if (wishlist && typeof wishlist === 'object') {
+        // If stored as object (for compatibility)
+        delete wishlist[productId];
+        localStorage.setItem("wishlist", JSON.stringify(wishlist));
+      }
+      setreload(!reload);
       toast.success(response.data.message);
     } catch (error) {
       console.error("Error adding to wishlist:", error);
       toast.error(error.response?.data?.message || "Failed to add to wishlist");
     }
 };
+
+const handleAddtoCart = async (productId) => {
+    if (!userData?.email) {
+      return toast.error("Please log in first");
+    }
+
+    try {
+      const response = await api.put("/add-to-cart", {
+        email: userData.email,
+        productId: productId,
+      });
+
+      toast.success(response.data.message);
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      toast.error(error.response?.data?.message || "Failed to add to cart");
+    }
+  };
 
 
 
@@ -71,7 +99,7 @@ const WishlishtEachcard = ({ id, setreload, reload }) => {
 
         <div className="mt-4 flex justify-between items-center">
           <span className="text-lg font-bold">${product?.price}</span>
-          <button className="bg-[#167389] hover:bg-[#135a6e] text-white px-4 py-2 rounded-md flex items-center">
+          <button onClick={()=>(handleAddtoCart(id?.productId))} className="bg-[#167389] hover:bg-[#135a6e] text-white px-4 py-2 rounded-md flex items-center">
             Add to Cart <ShoppingCartIcon className="ml-2 h-5 w-5" />
           </button>
         </div>

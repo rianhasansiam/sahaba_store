@@ -91,7 +91,7 @@ const ProductCard = ({ products, categoryName }) => {
   if (!products || products.length === 0) return null;
 
   return (
-    <div className="my-4 mx-[5vw] sm:mx-[10vw] lg:mx-[5vw] shadow-xl p-5 py-6 rounded-xl bg-white">
+    <div className="my-4 mx-[5vw] sm:mx-[10vw]  shadow-xl p-5 py-6 rounded-xl bg-white container lg:mx-auto">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-xl font-semibold">{categoryName}</h1>
         <button className="px-4 py-2 bg-[#167389] text-white rounded-md hover:bg-[#347e8f]">

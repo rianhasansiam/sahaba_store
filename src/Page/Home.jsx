@@ -29,7 +29,7 @@ const Home = () => {
   }, []);
 
   return (
-    <div className='bg-[#f7f7f7]'>
+    <div className='bg-[#f7f7f7] '>
       <Banner />
 
 <h1 className='text-center font-bold text-4xl mt-10 lg:text-6xl'>All Category</h1>
