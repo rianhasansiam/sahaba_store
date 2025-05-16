@@ -17,10 +17,10 @@ const Contex = ({ children }) => {
 
 
 
+const [finalPrice, setFinalPrice] = useState(0);
 
 
-
-
+console.log(finalPrice)
 
 
 
@@ -136,6 +136,8 @@ setLogoutLoading(true)
     loading,
     signoutHandle,
     logoutLoading,
+    setFinalPrice,
+    finalPrice
 
     
   };

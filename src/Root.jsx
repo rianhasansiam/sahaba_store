@@ -19,6 +19,7 @@ import AllCategories from "./Page/AdminPannel/AllCategories";
 import AllProducts from "./Page/AdminPannel/AllProducts";
 import CouponManagement from "./Page/AdminPannel/CouponManagement";
 import AllProdect from "./Page/AllProdect";
+import CheckoutPage from "./Page/CheckoutPage";
 
 
 
@@ -60,6 +61,10 @@ const Root = createBrowserRouter([
       {
         path: '/addtocart',
         element: <AddToCart></AddToCart>
+      },
+      {
+        path: '/checkout',
+        element: <CheckoutPage></CheckoutPage>
       },
 
 

@@ -4,9 +4,11 @@ import { useFetchData } from "../hooks/useFetchData";
 import { ArrowLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import AddtocartProduct from "../Conponents/AddtocartProduct";
 import { useDeleteData } from "../hooks/useDeleteData";
+import { toast } from 'react-toastify';
+import { Link } from "react-router-dom";
 
 const AddToCart = () => {
-  const { userData } = useContext(contextData);
+  const { userData, setFinalPrice } = useContext(contextData);
 
   // Load cart from localStorage initially
   const [cartQuantities, setCartQuantities] = useState(() => {
@@ -21,7 +23,7 @@ const AddToCart = () => {
 
   useEffect(() => {
     refetch();
-  }, []);
+  }, [refetch]);
 
   // Update localStorage whenever cartQuantities changes
   useEffect(() => {
@@ -50,6 +52,11 @@ const AddToCart = () => {
     });
   };
 
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponError, setCouponError] = useState("");
+  const [discountAmount, setDiscountAmount] = useState(0);
+
   // Calculate subtotal based on cartQuantities state
   const subtotal = cartItems.reduce((sum, item) => {
     const quantity = cartQuantities[item._id] || 1;
@@ -57,7 +64,62 @@ const AddToCart = () => {
     return sum + price * quantity;
   }, 0);
 
-  const total = subtotal;
+  // Calculate total after discount
+  const total = subtotal - discountAmount;
+
+  // Update finalPrice in context only after render, not during render
+  useEffect(() => {
+    setFinalPrice(total);
+  }, [total, setFinalPrice]);
+
+  // Fetch all coupons
+  const { data: coupons } = useFetchData(
+    "coupons",
+    "/coupons"
+  );
+
+  // Coupon apply handler
+  const handleApplyCoupon = () => {
+    setCouponError("");
+    setAppliedCoupon(null);
+    setDiscountAmount(0);
+    if (!couponCode.trim()) {
+      setCouponError("Please enter a coupon code.");
+      return;
+    }
+    if (!coupons) {
+      setCouponError("Coupons not loaded. Try again later.");
+      return;
+    }
+    const found = coupons.find(
+      (c) => c.code.toLowerCase() === couponCode.trim().toLowerCase()
+    );
+    if (!found) {
+      setCouponError("Coupon not found.");
+      toast.error("Coupon not found.");
+      return;
+    }
+    if (found.status !== "active") {
+      setCouponError("Coupon is not active.");
+      toast.error("Coupon is not active.");
+      return;
+    }
+    if (subtotal < found.minOrder) {
+      setCouponError(`Minimum order for this coupon is $${found.minOrder}`);
+      toast.error(`Minimum order for this coupon is $${found.minOrder}`);
+      return;
+    }
+    // Calculate discount
+    let discount = 0;
+    if (found.type === "fixed") {
+      discount = found.discount;
+    } else if (found.type === "percent") {
+      discount = subtotal * (found.discount / 100);
+    }
+    setAppliedCoupon(found);
+    setDiscountAmount(discount);
+    toast.success("Coupon applied!");
+  };
 
   if (isLoading) return <p>Loading cart...</p>;
   if (error) return <p>Error: {error.message}</p>;
@@ -112,7 +174,7 @@ const AddToCart = () => {
 
                 <div className="flex justify-between">
                   <span className="text-gray-600">Shipping</span>
-                  <span className="font-medium">Free</span>
+                  <span className="font-medium">Included</span>
                 </div>
 
                 <div className="border-t border-gray-200 pt-4">
@@ -122,9 +184,9 @@ const AddToCart = () => {
                   </div>
                 </div>
 
-                <button className="w-full bg-[#167389] hover:bg-[#135a6e] text-white py-3 px-4 rounded-md font-medium mt-4">
+                <Link to='/checkout'  className="block w-[60%] bg-[#167389] hover:bg-[#135a6e] text-white py-3 px-4 rounded-md font-medium mt-4 ">
                   Proceed to Checkout
-                </button>
+                </Link>
               </div>
 
               <div className="mt-8">
@@ -132,13 +194,27 @@ const AddToCart = () => {
                 <div className="flex">
                   <input
                     type="text"
+                    value={couponCode}
+                    onChange={e => setCouponCode(e.target.value)}
                     placeholder="Coupon Code"
                     className="flex-1 border border-gray-300 rounded-l-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#167389] focus:border-[#167389]"
                   />
-                  <button className="bg-[#167389] hover:bg-[#135a6e] text-white px-4 py-2 rounded-r-md">
+                  <button
+                    className="bg-[#167389] hover:bg-[#135a6e] text-white px-4 py-2 rounded-r-md"
+                    onClick={handleApplyCoupon}
+                    type="button"
+                  >
                     Apply
                   </button>
                 </div>
+                {couponError && (
+                  <div className="text-red-500 text-xs mt-1">{couponError}</div>
+                )}
+                {appliedCoupon && (
+                  <div className="text-green-600 text-xs mt-1">
+                    Coupon <b>{appliedCoupon.code}</b> applied! Discount: ${discountAmount.toFixed(2)}
+                  </div>
+                )}
               </div>
             </div>
           </div>
