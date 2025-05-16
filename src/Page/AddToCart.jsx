@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import { Link } from "react-router-dom";
 
 const AddToCart = () => {
-  const { userData, setFinalPrice } = useContext(contextData);
+  const { userData, setFinalPrice, setCheckoutProducts } = useContext(contextData);
 
   // Load cart from localStorage initially
   const [cartQuantities, setCartQuantities] = useState(() => {
@@ -121,6 +121,19 @@ const AddToCart = () => {
     toast.success("Coupon applied!");
   };
 
+  // Handler for Proceed to Checkout
+  const handleProceedToCheckout = () => {
+    // Prepare product info for checkout
+    const checkoutProductsArr = cartItems.map(item => ({
+      image: item.image,
+      price: item.price,
+      productId: item.productId || item._id,
+      name: item.name,
+      quantity: cartQuantities[item._id] || 1
+    }));
+    setCheckoutProducts(checkoutProductsArr);
+  };
+
   if (isLoading) return <p>Loading cart...</p>;
   if (error) return <p>Error: {error.message}</p>;
   return (
@@ -184,7 +197,11 @@ const AddToCart = () => {
                   </div>
                 </div>
 
-                <Link to='/checkout'  className="block w-[60%] bg-[#167389] hover:bg-[#135a6e] text-white py-3 px-4 rounded-md font-medium mt-4 ">
+                <Link
+                  to='/checkout'
+                  className="block w-[60%] bg-[#167389] hover:bg-[#135a6e] text-white py-3 px-4 rounded-md font-medium mt-4 "
+                  onClick={handleProceedToCheckout}
+                >
                   Proceed to Checkout
                 </Link>
               </div>

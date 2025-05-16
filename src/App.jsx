@@ -10,7 +10,7 @@ import { contextData } from "./Contex";
 
 function App() {
 
-const {userData,loading}=useContext(contextData)
+const {loading}=useContext(contextData)
 
 
 if(loading) return <h1>Loading.............</h1>

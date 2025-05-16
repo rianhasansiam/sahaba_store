@@ -2,6 +2,8 @@ import { createContext, useEffect, useState } from "react";
 import auth from "./Page/user/Firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import Swal from "sweetalert2";
+import { usePostData } from "./hooks/usePostData";
+
 
 // Creating a context to share auth-related data across components
 export const contextData = createContext();
@@ -14,17 +16,13 @@ const Contex = ({ children }) => {
   // State to handle loading state
   const [loading, setLoading] = useState(true);
 
+  const [finalPrice, setFinalPrice] = useState(0);
+  const [checkoutProducts, setCheckoutProducts] = useState([]);
+  const [orderInfo, setOrderInfo] = useState({});
+  const [customerOrder, setCustomerOrder] = useState([]);
 
-
-
-const [finalPrice, setFinalPrice] = useState(0);
-
-
-console.log(finalPrice)
-
-
-
-
+  console.log(customerOrder)
+  // console.log(checkoutProducts)
 
 
 
@@ -58,6 +56,10 @@ console.log(finalPrice)
 
 
 
+
+
+
+ 
 
 
 
@@ -127,8 +129,8 @@ setLogoutLoading(true)
         // Handle any error during sign out (optional)
         console.error("Sign-out error:", error);
       });
-  };
-
+    };
+    
 
   // Data to be shared via context
   const info = {
@@ -137,7 +139,14 @@ setLogoutLoading(true)
     signoutHandle,
     logoutLoading,
     setFinalPrice,
-    finalPrice
+    finalPrice,
+    setCheckoutProducts,
+    checkoutProducts,
+    setOrderInfo,
+    orderInfo,
+    setCustomerOrder,
+    customerOrder,
+  
 
     
   };
