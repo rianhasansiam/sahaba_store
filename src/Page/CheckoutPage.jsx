@@ -113,7 +113,7 @@ const CheckoutPage = () => {
         image: product.image
       })),
       orderTotal: finalPrice,
-      status: 'processing',
+     
       createdAt: new Date().toISOString()
     };
 
@@ -132,7 +132,7 @@ const CheckoutPage = () => {
         confirmButtonText: 'View Order'
       }).then((result) => {
         if (result.isConfirmed) {
-          navigate('/order-confirmation', { state: { order: orderData } });
+          navigate('/orderOverview', { state: { order: orderData } });
         } else {
           navigate('/');
         }
