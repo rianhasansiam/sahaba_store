@@ -22,6 +22,7 @@ import AllProdect from "./Page/AllProdect";
 import CheckoutPage from "./Page/CheckoutPage";
 import OrderConfirmation from "./Page/OrderConfirmation";
 import ProductDetails from "./Page/ProductDetails";
+import ErrorPage from "./Conponents/ErrorPage";
 
 
 
@@ -29,6 +30,7 @@ const Root = createBrowserRouter([
   {
     path: "/",
     element: <App></App>,
+    errorElement:<ErrorPage></ErrorPage>,
     children:[
 
       {
