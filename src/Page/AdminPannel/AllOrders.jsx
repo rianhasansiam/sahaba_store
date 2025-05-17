@@ -1,3 +1,4 @@
+import LoadingPage from '../../Conponents/LoadingPage';
 import { useFetchData } from '../../hooks/useFetchData';
 import { useUpdateData } from '../../hooks/useUpdateData';
 import { useState } from 'react';
@@ -26,7 +27,7 @@ const AllOrders = () => {
     updateOrderStatus({ id: orderId, data: { status: newStatus } }); // Only send status
   };
 
-  if (isLoading) return <div className="p-8 text-lg text-gray-600">Loading orders...</div>;
+  if (isLoading) return <LoadingPage></LoadingPage>
   if (error) return <div className="p-8 text-lg text-red-600">Failed to load orders.</div>;
 
   return (

@@ -6,6 +6,7 @@ import AddtocartProduct from "../Conponents/AddtocartProduct";
 import { useDeleteData } from "../hooks/useDeleteData";
 import { toast } from 'react-toastify';
 import { Link } from "react-router-dom";
+import LoadingPage from "../Conponents/LoadingPage";
 
 const AddToCart = () => {
   const { userData, setFinalPrice, setCheckoutProducts } = useContext(contextData);
@@ -134,7 +135,7 @@ const AddToCart = () => {
     setCheckoutProducts(checkoutProductsArr);
   };
 
-  if (isLoading) return <p>Loading cart...</p>;
+  if (isLoading) return <LoadingPage></LoadingPage>
   if (error) return <p>Error: {error.message}</p>;
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">

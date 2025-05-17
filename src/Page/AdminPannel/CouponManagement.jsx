@@ -6,6 +6,7 @@ import { useUpdateData } from '../../hooks/useUpdateData';
 import { useDeleteData } from '../../hooks/useDeleteData';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
+import LoadingPage from '../../Conponents/LoadingPage';
 
 const CouponManagement = () => {
   const { data, isLoading, isError, refetch } = useFetchData('coupons', '/coupons');
@@ -109,7 +110,7 @@ const CouponManagement = () => {
   const filteredCoupons = coupons.filter((coupon) =>
     coupon.code.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  // console.log(data)
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="max-w-6xl mx-auto">
@@ -137,7 +138,7 @@ const CouponManagement = () => {
 
         {/* Loading / Error */}
         {isLoading ? (
-          <p className="text-center text-gray-500">Loading coupons...</p>
+         <LoadingPage></LoadingPage>
         ) : isError ? (
           <p className="text-center text-red-500">Failed to load coupons. Please try again.</p>
         ) : (

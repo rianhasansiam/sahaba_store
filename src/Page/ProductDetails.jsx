@@ -5,6 +5,7 @@ import { FaStar, FaShoppingCart, FaHeart, FaShare } from 'react-icons/fa';
 import { contextData } from '../Contex';
 import api from '../hooks/api';
 import { toast } from 'react-toastify';
+import LoadingPage from '../Conponents/LoadingPage';
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -94,7 +95,7 @@ const ProductDetails = () => {
     }
   };
 
-  if (isLoading) return <div className="text-center py-20">Loading product...</div>;
+  if (isLoading) return <LoadingPage></LoadingPage>
   if (error) return <div className="text-center py-20 text-red-500">Error loading product</div>;
   if (!product) return <div className="text-center py-20">Product not found</div>;
 

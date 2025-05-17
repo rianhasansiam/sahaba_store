@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FaCheckCircle, FaBox, FaShippingFast, FaMoneyBillWave, FaHome } from 'react-icons/fa';
 import { useFetchData } from '../hooks/useFetchData';
+import LoadingPage from '../Conponents/LoadingPage';
 
 const OrderConfirmation = () => {
   const { state } = useLocation();
@@ -71,7 +72,7 @@ const OrderConfirmation = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-lg text-gray-600">Loading order details...</div>
+     <LoadingPage></LoadingPage>
     );
   }
   if (error) {

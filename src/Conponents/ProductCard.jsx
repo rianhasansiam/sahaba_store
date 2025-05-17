@@ -98,7 +98,7 @@ const ProductCard = ({ products, categoryName, categoryID }) => {
   if (!products || products.length === 0) return null;
 
   return (
-    <div className="my-4 mx-4 sm:mx-6 lg:mx-8 xl:mx-auto max-w-7xl shadow-lg p-4 sm:p-6 rounded-xl bg-white">
+    <div className="my-4 mx-4 sm:mx-6 lg:mx-8 xl:mx-auto max-w-7xl shadow-lg p-4 sm:p-6 rounded-xl bg-white ">
       <div className="flex  sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
         <h1 className="text-lg sm:text-xl font-semibold text-gray-800">{categoryName}</h1>
         {location.pathname === '/' && (
@@ -154,11 +154,11 @@ const ProductCard = ({ products, categoryName, categoryID }) => {
             <div className="p-2 sm:p-3 flex-grow flex flex-col">
               <h3 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-1 mb-1">{item?.name}</h3>
               <p className="text-gray-500 text-xs sm:text-sm line-clamp-2 mb-2 sm:mb-3">{item?.shortDescription}</p>
-              <div className="mt-auto flex flex-col sm:flex-row justify-between items-center">
+              <div className="mt-auto flex flex-col  justify-between items-center">
 
                 <span className="font-bold text-sm sm:text-base">{item.price} BDT</span>
 
-                <div className="flex gap-2 my-2 sm:my-0 sm:gap-2 ">
+                <div className="flex gap-2 my-3  sm:gap-2 ">
                   <button
                     onClick={() => handleViewDetails(item?._id)}
                     className="text-xs sm:text-sm px-2 sm:px-3 py-0.5 sm:py-1 bg-gray-100 hover:bg-gray-200 rounded-md whitespace-nowrap"
@@ -172,6 +172,7 @@ const ProductCard = ({ products, categoryName, categoryID }) => {
                     Add to Cart
                   </button>
                 </div>
+
               </div>
             </div>
           </div>

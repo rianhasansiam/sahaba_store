@@ -5,6 +5,7 @@ import { useUpdateData } from '../../hooks/useUpdateData';
 import { useDeleteData } from '../../hooks/useDeleteData';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
+import LoadingPage from '../../Conponents/LoadingPage';
 
 const AllCategories = () => {
   const [isUploading, setIsUploading] = useState(false);
@@ -24,7 +25,7 @@ const AllCategories = () => {
 
   // Custom hooks
   const { data: categories = [], isLoading, isError, refetch } = useFetchData('categories', '/allcategories');
-  // console.log(categories)
+
   const { mutate: addCategory, isPending: isAdding } = usePostData('/add-category');
   const { mutate: updateCategory } = useUpdateData('/edit-category');
   const { mutate: deleteCategory } = useDeleteData('/delete-category');
@@ -279,7 +280,7 @@ const AllCategories = () => {
       {/* Table Section */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         {isLoading ? (
-          <p className="p-4">Loading categories...</p>
+          <LoadingPage></LoadingPage>
         ) : isError ? (
           <p className="p-4 text-red-500">Failed to load categories.</p>
         ) : (

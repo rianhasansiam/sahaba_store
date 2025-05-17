@@ -5,11 +5,12 @@ import { useFetchData } from '../hooks/useFetchData'
 import logo from '../assets/img/logo2.png' 
 import Searchbar from './Searchbar'
 import { toast } from "react-toastify";
+import LoadingPage from './LoadingPage'
 
 const Navbar = () => {
 
   const { userData, signoutHandle, logoutLoading, setUserProfile } = useContext(contextData)
-  console.log(userData)
+
   const location = useLocation()
 
 
@@ -29,7 +30,6 @@ const Navbar = () => {
   );
 
 
-  console.log(userProfile?.data?.userRole)
 
   useEffect(() => {
     if (userProfile && setUserProfile) {
@@ -67,7 +67,7 @@ const Navbar = () => {
                 <summary>All Products</summary>
                 <ul className="p-2 bg-gray-100 rounded-md z-10">
                   {catLoading ? (
-                    <li className='text-black'>Loading...</li>
+                   <LoadingPage></LoadingPage>
                   ) : (
                     <>
                       <li className='text-black'>
@@ -113,7 +113,7 @@ const Navbar = () => {
                 <summary>All Products</summary>
                 <ul className="p-2 bg-gray-100 rounded-md z-10">
                   {catLoading ? (
-                    <li className='text-black'>Loading...</li>
+           <LoadingPage></LoadingPage>
                   ) : (
                     <>
                       <li className='text-black'>

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 const CategoryCard = ({eachCategory}) => {
 
 const navigate = useNavigate();
-// console.log(eachCategory)
+
 
   return (
     <div onClick={()=>navigate(`/allproduct/${eachCategory?._id}`)} className='  rounded-xl bg-white border flex items-center justify-center gap-4 px-2 py-2 pr-7 cursor-pointer shadow-sm'>

@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 import { useContext } from "react";
 import { contextData } from "./Contex";
+import LoadingPage from "./Conponents/LoadingPage";
 
 
 
@@ -13,7 +14,7 @@ function App() {
 const {loading}=useContext(contextData)
 
 
-if(loading) return <h1>Loading.............</h1>
+if(loading) return <LoadingPage></LoadingPage>
   return (
     <>
    <Navbar></Navbar>

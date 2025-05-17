@@ -4,6 +4,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useDeleteData } from "../../hooks/useDeleteData";
 import Swal from "sweetalert2";
+import LoadingPage from "../../Conponents/LoadingPage";
 
 const AllUsers = () => {
   const queryClient = useQueryClient();
@@ -65,7 +66,7 @@ const handleDelete = (id) => {
 
 
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <LoadingPage></LoadingPage>
   if (isError) return <div>Error: {error.message}</div>;
 
   return (

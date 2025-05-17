@@ -169,3 +169,17 @@ img {
     background-color: #167389 !important;
     color: white !important;
   } */
+
+
+
+  /* Add to your CSS file */
+.loading-spinner {
+  --spinner-size: 3rem;
+  --spinner-color: theme('colors.blue.500');
+  --spinner-speed: 0.8s;
+}
+
+.loading-skeleton {
+  --skeleton-bg: theme('colors.gray.200');
+  --skeleton-animation: pulse 1.5s infinite;
+}

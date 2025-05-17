@@ -22,8 +22,6 @@ const Contex = ({ children }) => {
   const [customerOrder, setCustomerOrder] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // console.log(customerOrder)
-  // console.log(checkoutProducts)
 
 
 

@@ -6,6 +6,7 @@ import { useUpdateData } from '../../hooks/useUpdateData';
 import { useDeleteData } from '../../hooks/useDeleteData';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
+import LoadingPage from '../../Conponents/LoadingPage';
 
 const AllProducts = () => {
   const [productForm, setProductForm] = useState({
@@ -440,7 +441,7 @@ const AllProducts = () => {
       {/* Products Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         {isLoading ? (
-          <div className="p-6 text-center">Loading products...</div>
+         <LoadingPage></LoadingPage>
         ) : isError ? (
           <div className="p-6 text-center text-red-500">
             Failed to load products. Please try again.

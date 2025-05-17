@@ -5,6 +5,7 @@ import { HeartIcon, ShoppingCartIcon } from '@heroicons/react/24/solid';
 import { toast } from 'react-toastify';
 import { contextData } from '../Contex';
 import api from '../hooks/api';
+import LoadingPage from './LoadingPage';
 
 const WishlishtEachcard = ({ id, setreload, reload }) => {
     const {userData} =useContext(contextData)
@@ -19,13 +20,13 @@ const WishlishtEachcard = ({ id, setreload, reload }) => {
   });
 
   if (isLoading) {
-    return <p className="text-center py-4">Loading...</p>;
+    return  <LoadingPage></LoadingPage>
   }
 
   // if (isError) {
   //   return <p className="text-center text-red-500 py-4">Error: {error.message}</p>;
   // }
-// console.log(id)
+
 
 
   // Handle remove to Wishlist
