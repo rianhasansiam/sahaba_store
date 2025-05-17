@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from 'react'
-import { Link, NavLink, useLocation } from 'react-router-dom'
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { contextData } from '../Contex'
 import { useFetchData } from '../hooks/useFetchData'
 import logo from '../assets/img/logo2.png' 
@@ -14,7 +14,7 @@ const Navbar = () => {
   const location = useLocation()
 
 
-
+const navigate=useNavigate()
 
 
   
@@ -157,7 +157,8 @@ const Navbar = () => {
                 e.preventDefault();
                 toast.error('You need to log in first.');
               } else {
-                window.location.href = '/wishlist';
+              
+                     navigate("/wishlist")
               }
             }}
           >
@@ -170,7 +171,8 @@ const Navbar = () => {
                 e.preventDefault();
                 toast.error('You need to log in first.');
               } else {
-                window.location.href = '/addtocart';
+               
+                navigate("/addtocart")
               }
             }}
           >
