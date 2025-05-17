@@ -28,7 +28,7 @@ const AddtocartProduct = ({ item, quantity, refetch, onQuantityChange, onDelete 
     setError(null);
 
     try {
-      const response = await axios.delete('http://localhost:5000/remove-from-cart', {
+      const response = await axios.delete('https://sahaba-store-server.vercel.app/remove-from-cart', {
         data: {
           email: userData?.email,
           productId: id,
