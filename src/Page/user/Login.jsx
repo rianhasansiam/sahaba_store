@@ -106,7 +106,7 @@ const Login = () => {
                   placeholder=" "
                   className="login__input w-full p-3 rounded"
                 />
-                <label className="login__label absolute left-3 top-1 text-sm text-gray-600">Email</label>
+                <label className="login__label absolute left-3 top-7 text-sm text-gray-600">Email</label>
               </div>
 
               {/* Password Field */}
@@ -119,9 +119,9 @@ const Login = () => {
                   placeholder=" "
                   className="login__input w-full p-3 rounded pr-10"
                 />
-                <label className="login__label absolute left-3 top-1 text-sm text-gray-600">Password</label>
+                <label className="login__label absolute left-3 top-7 text-sm text-gray-600">Password</label>
                 <div
-                  className="absolute right-3 top-[50%] translate-y-[-50%] text-gray-600 cursor-pointer"
+                  className="absolute right-7 top-[50%] translate-y-[-50%] text-gray-600 cursor-pointer z-10"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
@@ -129,9 +129,9 @@ const Login = () => {
               </div>
             </div>
 
-            <Link to="#" className="text-right block hover:text-[#167389] hover:font-semibold underline">
+            {/* <Link to="#" className="text-right block hover:text-[#167389] hover:font-semibold underline">
               Forgot your password?
-            </Link>
+            </Link> */}
 
             <button type="submit" className="login__button bg-[#167389] text-white py-2 w-full rounded mt-4">
               {isLoading ? 'Logging in...' : 'Login'}
