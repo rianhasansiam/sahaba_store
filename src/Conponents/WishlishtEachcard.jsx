@@ -98,7 +98,7 @@ const handleAddtoCart = async (productId) => {
         </div>
 
         <div className="mt-4 flex justify-between items-center">
-          <span className="text-lg font-bold">${product?.price}</span>
+          <span className="text-lg font-bold">{product?.price} BDT</span>
           <button onClick={()=>(handleAddtoCart(id?.productId))} className="bg-[#167389] hover:bg-[#135a6e] text-white px-4 py-2 rounded-md flex items-center">
             Add to Cart <ShoppingCartIcon className="ml-2 h-5 w-5" />
           </button>

@@ -12,15 +12,19 @@ import Contex from './Contex.jsx'
 const queryClient = new QueryClient()
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-  <Contex>
+
 
 
       
          <QueryClientProvider client={queryClient}>
+  <Contex>
+
         <RouterProvider router={Root} />
+ </Contex>
+
       </QueryClientProvider>
      
 
-    </Contex>
+   
   </StrictMode>,
 )

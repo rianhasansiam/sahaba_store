@@ -1,5 +1,6 @@
 import React from 'react'
-
+import { Link } from 'react-router-dom'
+import logo from '../assets/img/logo.jpeg' 
 export const Footer = () => {
   return (
    <footer className="bg-white text-black border-t ">
@@ -10,41 +11,39 @@ export const Footer = () => {
     {/* CONTACT */}
     <div>
       <h3 className="font-bold mb-2">CONTACT</h3>
-      <p>House 42, Road 3/A, Dhanmondi, Dhaka, Bangladesh</p>
-      <p className="mt-2">Email: skybuybd@gmail.com</p>
-      <p>Phone: 09613828606</p>
+      <p>Tongi,Gazipur, Dhaka, Bangladesh</p>
+      <p className="mt-2">Email: sahabastore130@gmail.com</p>
+      <p>Phone:  +8801334314465</p>
+      <p>WhatsApp:  +8801334314465</p>
     </div>
 
     {/* BRANDS & SOCIAL */}
     <div className="col-span-1 md:col-span-1 text-center">
       {/* <img src="/logo.png" alt="Logo" className="w-24 mx-auto mb-2" /> */}
-      <h1>Logo</h1>
+      <h1><img className='w-20 mx-auto' src={logo} alt="logo" /></h1>
 
   <div className="flex justify-center gap-4 my-2">
-  <a href="https://www.facebook.com/rianhasan1971" target="_blank" rel="noopener noreferrer">
+  <a href="https://www.facebook.com/profile.php?id=61550942862694" target="_blank" rel="noopener noreferrer">
     <i className="fab fa-facebook text-2xl text-blue-500"></i>
   </a>
-  <a href="https://www.facebook.com/rianhasan1971" target="_blank" rel="noopener noreferrer">
+  <a href="/" target="_blank" rel="noopener noreferrer">
     <i className="fab fa-instagram text-2xl text-pink-600"></i>
   </a>
-  <a href="https://www.facebook.com/rianhasan1971" target="_blank" rel="noopener noreferrer">
+  <a href="/" target="_blank" rel="noopener noreferrer">
     <i className="fab fa-youtube text-2xl text-red-500"></i>
   </a>
-  <a href="https://www.facebook.com/rianhasan1971" target="_blank" rel="noopener noreferrer">
+  <a href="/" target="_blank" rel="noopener noreferrer">
     <i className="fab fa-linkedin text-2xl text-blue-500"></i>
   </a>
-  <a href="https://www.facebook.com/rianhasan1971" target="_blank" rel="noopener noreferrer">
+  <a href="/" target="_blank" rel="noopener noreferrer">
     <i className="fab fa-tiktok text-2xl"></i>
   </a>
 </div>
 
 
-      <p className="mt-2">Heading name Sahabastore</p>
+      <p className="mt-2">You Can Trust On Sahaba-Store</p>
       <div className="flex justify-center gap-3 mt-3">
-        {/* <img src="/skybuy.png" alt="SkyBuy" className="h-10" />
-        <img src="/skyship.png" alt="SkyShip" className="h-10" />
-        <img src="/express.png" alt="Express" className="h-10" /> */}
-        <h1>Logo if i want to add</h1>
+        
       </div>
     </div>
 
@@ -52,12 +51,12 @@ export const Footer = () => {
     <div>
       <h3 className="font-bold mb-2">CUSTOMER</h3>
       <ul className="space-y-1">
-        <li><a href="#">Account</a></li>
-        <li><a href="#">Cart</a></li>
-        <li><a href="#">Wishlist</a></li>
-        <li><a href="#">Shipping Charge</a></li>
-        <li><a href="#">Retail Purchase</a></li>
-        <li><a href="#">FAQ</a></li>
+        <li><Link to="#">Account</Link></li>
+        <li><Link to="#">Cart</Link></li>
+        <li><Link to="#">Wishlist</Link></li>
+        <li><Link to="#">Shipping Charge</Link></li>
+        <li><Link to="#">Retail Purchase</Link></li>
+        <li><Link to="#">FAQ</Link></li>
       </ul>
     </div>
 
@@ -65,12 +64,12 @@ export const Footer = () => {
     <div>
       <h3 className="font-bold mb-2">INFORMATION</h3>
       <ul className="space-y-1">
-        <li><a href="#">About us</a></li>
-        <li><a href="#">Contact Us</a></li>
-        <li><a href="#">Privacy Policy</a></li>
-        <li><a href="#">Returns & Refund</a></li>
-        <li><a href="#">Terms & Conditions</a></li>
-        <li><a href="#">Secured Payment</a></li>
+        <li><Link to="#">About us</Link></li>
+        <li><Link to="#">Contact Us</Link></li>
+        <li><Link to="#">Privacy Policy</Link></li>
+        <li><Link to="#">Returns & Refund</Link></li>
+        <li><Link to="#">Terms & Conditions</Link></li>
+        <li><Link to="#">Secured Payment</Link></li>
       </ul>
     </div>
 

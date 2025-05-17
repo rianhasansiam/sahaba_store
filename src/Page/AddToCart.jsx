@@ -113,7 +113,7 @@ const AddToCart = () => {
     let discount = 0;
     if (found.type === "fixed") {
       discount = found.discount;
-    } else if (found.type === "percent") {
+    } else if (found.type === "percentage" || found.type === "percent") {
       discount = subtotal * (found.discount / 100);
     }
     setAppliedCoupon(found);
@@ -166,10 +166,10 @@ const AddToCart = () => {
               </div>
 
               <div className="mt-6 flex justify-end">
-                <button className="text-[#167389] hover:text-[#135a6e] flex items-center">
+                <Link to="/"  className="text-[#167389] hover:text-[#135a6e] flex items-center">
                   <ArrowLeftIcon className="h-5 w-5 mr-1" />
                   Continue Shopping
-                </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -182,8 +182,15 @@ const AddToCart = () => {
               <div className="space-y-4">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Sub Total</span>
-                  <span className="font-medium">${subtotal.toFixed(2)}</span>
+                  <span className={`font-medium${discountAmount > 0 ? ' line-through text-gray-400' : ''}`}>${subtotal.toFixed(2)}</span>
                 </div>
+
+                {discountAmount > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Discount{appliedCoupon ? ` (${appliedCoupon.code})` : ''}</span>
+                    <span className="font-medium text-green-600">- ${discountAmount.toFixed(2)}</span>
+                  </div>
+                )}
 
                 <div className="flex justify-between">
                   <span className="text-gray-600">Shipping</span>

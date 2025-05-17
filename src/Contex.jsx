@@ -20,8 +20,9 @@ const Contex = ({ children }) => {
   const [checkoutProducts, setCheckoutProducts] = useState([]);
   const [orderInfo, setOrderInfo] = useState({});
   const [customerOrder, setCustomerOrder] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  console.log(customerOrder)
+  // console.log(customerOrder)
   // console.log(checkoutProducts)
 
 
@@ -146,9 +147,8 @@ setLogoutLoading(true)
     orderInfo,
     setCustomerOrder,
     customerOrder,
-  
-
-    
+    searchTerm,
+    setSearchTerm,
   };
 
   return (

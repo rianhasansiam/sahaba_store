@@ -22,41 +22,41 @@ const Contact = () => {
             <div className="space-y-6">
               <div className="flex items-start">
                 <div className="flex-shrink-0">
-                  <svg className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-6 w-6 text-[#167389]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
                 </div>
                 <div className="ml-3">
                   <p className="text-lg font-medium text-gray-900">Customer Service</p>
-                  <p className="text-gray-500">+1 (800) 123-4567</p>
-                  <p className="text-gray-500">Mon-Fri: 9am-6pm EST</p>
+                  <p className="text-gray-500">+8801334314465</p>
+                  <p className="text-gray-500">Sat-Fri: 9am-6pm </p>
                 </div>
               </div>
               
               <div className="flex items-start">
                 <div className="flex-shrink-0">
-                  <svg className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-6 w-6 text-[#167389]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                 </div>
                 <div className="ml-3">
                   <p className="text-lg font-medium text-gray-900">Email Support</p>
-                  <p className="text-gray-500">support@yourstore.com</p>
-                  <p className="text-gray-500">orders@yourstore.com</p>
+                  <p className="text-gray-500">sahabastore130@gmail.com</p>
+                 
                 </div>
               </div>
               
               <div className="flex items-start">
                 <div className="flex-shrink-0">
-                  <svg className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-6 w-6 text-[#167389]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </div>
                 <div className="ml-3">
                   <p className="text-lg font-medium text-gray-900">Our Location</p>
-                  <p className="text-gray-500">123 Commerce Street</p>
-                  <p className="text-gray-500">New York, NY 10001</p>
+                  <p className="text-gray-500">Tongi,Gazipur</p>
+                  <p className="text-gray-500">Dhaka, Bangladesh</p>
                 </div>
               </div>
             </div>
@@ -116,17 +116,17 @@ const Contact = () => {
                 <div className="border-b border-gray-200 pb-4">
                   <h4 className="font-medium text-gray-800">Order Status</h4>
                   <p className="text-gray-600 text-sm">Track your recent orders and view order history</p>
-                  <a href="#" className="text-indigo-600 text-sm font-medium hover:text-indigo-800">Check Status →</a>
+                  <a href="#" className="text-[#167389] text-sm font-medium hover:text-indigo-800">Check Status →</a>
                 </div>
                 <div className="border-b border-gray-200 pb-4">
                   <h4 className="font-medium text-gray-800">Returns & Exchanges</h4>
                   <p className="text-gray-600 text-sm">Start a return or exchange for items purchased</p>
-                  <a href="#" className="text-indigo-600 text-sm font-medium hover:text-indigo-800">Learn More →</a>
+                  <a href="#" className="text-[#167389] text-sm font-medium hover:text-indigo-800">Learn More →</a>
                 </div>
                 <div className="border-b border-gray-200 pb-4">
                   <h4 className="font-medium text-gray-800">FAQs</h4>
                   <p className="text-gray-600 text-sm">Find answers to common questions</p>
-                  <a href="#" className="text-indigo-600 text-sm font-medium hover:text-indigo-800">View FAQs →</a>
+                  <a href="#" className="text-[#167389] text-sm font-medium hover:text-indigo-800">View FAQs →</a>
                 </div>
               </div>
             </div>
@@ -147,7 +147,7 @@ const Contact = () => {
             </div>
           </div>
           <div className="mt-4 text-center">
-            <Link to="https://www.google.com/maps/dir/23.7935342,90.3593275/23.90586,90.39379/@23.8358857,90.3047649,12z/data=!3m1!4b1!4m4!4m3!1m1!4e1!1m0?entry=ttu&g_ep=EgoyMDI1MDUxMy4xIKXMDSoASAFQAw%3D%3D" className="text-indigo-600 font-medium hover:text-indigo-800">
+            <Link to="https://www.google.com/maps/dir/23.7935342,90.3593275/23.90586,90.39379/@23.8358857,90.3047649,12z/data=!3m1!4b1!4m4!4m3!1m1!4e1!1m0?entry=ttu&g_ep=EgoyMDI1MDUxMy4xIKXMDSoASAFQAw%3D%3D" className="text-[#167389] font-medium hover:text-indigo-800">
               Get Directions →
             </Link>
           </div>

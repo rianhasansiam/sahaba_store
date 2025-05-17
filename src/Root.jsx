@@ -21,6 +21,7 @@ import CouponManagement from "./Page/AdminPannel/CouponManagement";
 import AllProdect from "./Page/AllProdect";
 import CheckoutPage from "./Page/CheckoutPage";
 import OrderConfirmation from "./Page/OrderConfirmation";
+import ProductDetails from "./Page/ProductDetails";
 
 
 
@@ -70,6 +71,10 @@ const Root = createBrowserRouter([
       {
         path: '/orderOverview',
         element: <OrderConfirmation></OrderConfirmation>
+      },
+      {
+        path: '/product-details/:id',
+        element: <ProductDetails></ProductDetails>
       },
 
 

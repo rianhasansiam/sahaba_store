@@ -1,14 +1,41 @@
-import React, { useContext } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import React, { useContext, useEffect } from 'react'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import { contextData } from '../Contex'
 import { useFetchData } from '../hooks/useFetchData'
+import logo from '../assets/img/logo2.png' 
+import Searchbar from './Searchbar'
+import { toast } from "react-toastify";
 
 const Navbar = () => {
 
-  const { userData, signoutHandle, logoutLoading } = useContext(contextData)
+  const { userData, signoutHandle, logoutLoading, setUserProfile } = useContext(contextData)
+  console.log(userData)
+  const location = useLocation()
+
+
+
+
+
+  
 
   // Fetch categories
   const { data: categories, isLoading: catLoading } = useFetchData('categories', '/allcategories');
+
+  // Fetch user profile when userData is present
+  const { data: userProfile, isLoading: userProfileLoading, error: userProfileError } = useFetchData(
+    userData ? ['userProfile', userData.email] : null,
+    userData ? `/user?email=${encodeURIComponent(userData.email)}` : '',
+    { enabled: !!userData }
+  );
+
+
+  console.log(userProfile?.data?.userRole)
+
+  useEffect(() => {
+    if (userProfile && setUserProfile) {
+      setUserProfile(userProfile.data);
+    }
+  }, [userProfile, setUserProfile]);
 
   return (
     <div className='bg-[#167389]'>
@@ -17,7 +44,7 @@ const Navbar = () => {
       <div className="navbar container m-auto">
         <div className="navbar-start">
           <div className="dropdown">
-            <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
+            <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden text-white">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
@@ -36,32 +63,46 @@ const Navbar = () => {
               className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow">
               <li><NavLink to="/">Home</NavLink></li>
               <li>
-                <details>
-                  <summary>All Products</summary>
-                  <ul className="p-2 bg-gray-100 rounded-md">
-                    {catLoading ? (
-                      <li className='text-black'>Loading...</li>
-                    ) : (
-                      <>
-                        <li className='text-black'>
-                          <NavLink to="/allproduct/all">All</NavLink>
+                 <details>
+                <summary>All Products</summary>
+                <ul className="p-2 bg-gray-100 rounded-md z-10">
+                  {catLoading ? (
+                    <li className='text-black'>Loading...</li>
+                  ) : (
+                    <>
+                      <li className='text-black'>
+                        <NavLink to="/allproduct/all">All</NavLink>
+                      </li>
+                      {categories?.map((cat) => (
+                        <li className='text-black' key={cat._id}>
+                          <NavLink to={`/allproduct/${cat._id}`}>{cat.name}</NavLink>
                         </li>
-                        {categories?.map((cat) => (
-                          <li className='text-black' key={cat._id || cat.id || cat.name}>
-                            <NavLink to={`/allproduct/${cat.slug || cat.name}`}>{cat.displayName || cat.name}</NavLink>
-                          </li>
-                        ))}
-                      </>
-                    )}
-                  </ul>
-                </details>
+                      ))}
+                    </>
+                  )}
+                </ul>
+              </details>
               </li>
-              <li><NavLink to="/wishlist">Wishlist</NavLink></li>
+              <li>
+                <NavLink
+                  to="/wishlist"
+                  onClick={e => {
+                    if (!userData) {
+                      e.preventDefault();
+                      toast.error('You need to log in first.');
+                    }
+                  }}
+                >
+                  Wishlist
+                </NavLink>
+              </li>
               <li><NavLink to="/contact">Contact</NavLink></li>
-              <li><NavLink to="/adminpage">Admin Pannel</NavLink></li>
+              {userProfile?.data?.userRole === "Admin" && (
+              <li><NavLink to="/adminpage/dashboard">Admin Pannel</NavLink></li>
+              )}
             </ul>
           </div>
-          <a className="btn btn-ghost text-xl">LOGO</a>
+          <Link to='/' className="w-24 "><img  src={logo} alt="logo" className="h-auto w-auto object-cover" /></Link>
         </div>
 
         <div className="navbar-center hidden lg:flex text-white font-semibold">
@@ -88,15 +129,53 @@ const Navbar = () => {
                 </ul>
               </details>
             </li>
-            <li><NavLink to="/wishlist">Wishlist</NavLink></li>
+            <li>
+              <NavLink
+                to="/wishlist"
+                onClick={e => {
+                  if (!userData) {
+                    e.preventDefault();
+                    toast.error('You need to log in first.');
+                  }
+                }}
+              >
+                Wishlist
+              </NavLink>
+            </li>
             <li><NavLink to="/contact">Contact</NavLink></li>
-            <li><NavLink to="/adminpage">Admin Pannel</NavLink></li>
+            {userProfile?.data?.userRole === "Admin" && (
+              <li><NavLink to="/adminpage/dashboard">Admin Pannel</NavLink></li>
+            )}
           </ul>
         </div>
 
         <div className="navbar-end text-white flex gap-5 text-xl items-center">
-          <Link to="/wishlist" className='block '><i className="fa-solid fa-heart"></i></Link>
-          <Link to="/addtocart" className='block '><i className="fa-solid fa-cart-shopping"></i></Link>
+          <button
+            className='block'
+            onClick={e => {
+              if (!userData) {
+                e.preventDefault();
+                toast.error('You need to log in first.');
+              } else {
+                window.location.href = '/wishlist';
+              }
+            }}
+          >
+            <i className="fa-solid fa-heart"></i>
+          </button>
+          <button
+            className='block'
+            onClick={e => {
+              if (!userData) {
+                e.preventDefault();
+                toast.error('You need to log in first.');
+              } else {
+                window.location.href = '/addtocart';
+              }
+            }}
+          >
+            <i className="fa-solid fa-cart-shopping"></i>
+          </button>
           {userData ?
             <button onClick={signoutHandle} className='text-lg btn flex hover:bg-gray-300'>
               {logoutLoading ? "Logouting.." : "Logout"}
@@ -105,33 +184,10 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Searchbar here */}
-      <div className="form-control w-full max-w-xs sm:max-w-md md:max-w-lg mx-auto">
-        <div className="input-group flex pb-5">
-          <input
-            type="text"
-            placeholder="Search products..."
-            className="input input-bordered w-full block rounded-l-3xl rounded-r-none 
-                     focus:outline-none focus:border-none focus:ring-0"
-          />
-          <button className="btn btn-square bg-black text-white border-none rounded-r-3xl rounded-l-none">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z"
-              />
-            </svg>
-          </button>
-        </div>
-      </div>
+
+
+
+     <Searchbar />
 
     </div>
   )

@@ -117,7 +117,7 @@ const CouponManagement = () => {
           <h1 className="text-2xl font-bold text-gray-800">Coupon Management</h1>
           <button
             onClick={handleAddCoupon}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-[#167389] text-white rounded-md hover:bg-[#54a0b1] transition-colors flex items-center gap-2"
           >
             <FaTicketAlt /> Add New Coupon
           </button>
@@ -156,7 +156,7 @@ const CouponManagement = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredCoupons.map((coupon) => (
                   <tr key={coupon._id || coupon.id}>
-                    <td className="px-6 py-4 font-medium text-blue-600">{coupon.code}</td>
+                    <td className="px-6 py-4 font-medium text-[#167389]">{coupon.code}</td>
                     <td className="px-6 py-4">
                       {coupon.type === 'percentage' ? `${coupon.discount}%` : `$${coupon.discount}`}
                     </td>
@@ -180,7 +180,7 @@ const CouponManagement = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 space-x-2 text-sm text-gray-500">
-                      <button onClick={() => handleEditCoupon(coupon)} className="text-blue-600 hover:text-blue-900">
+                      <button onClick={() => handleEditCoupon(coupon)} className="text-[#167389] hover:text-[#5ea2b1]">
                         <FaEdit />
                       </button>
                       <button onClick={() => handleDeleteCoupon(coupon._id || coupon.id)} className="text-red-600 hover:text-red-900">
@@ -282,7 +282,7 @@ const CouponManagement = () => {
                 <button
                   type="submit"
                   disabled={isAdding}
-                  className={`px-4 py-2 text-white rounded-md ${isAdding ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'}`}
+                  className={`px-4 py-2 text-white rounded-md ${isAdding ? 'bg-gray-400' : 'bg-[#167389] hover:bg-[#63acbd]'}`}
                 >
                   {currentCoupon ? 'Update Coupon' : 'Save Coupon'}
                 </button>

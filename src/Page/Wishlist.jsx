@@ -144,7 +144,7 @@ const Wishlist = () => {
               <div className="space-y-4">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Subtotal ({itemCount} items)</span>
-                  <span className="font-medium">{loadingProducts ? 'Loading...' : `$${subtotal.toFixed(2)}`}</span>
+                  <span className="font-medium">{loadingProducts ? 'Loading...' : `${subtotal.toFixed(2)}`} BDT</span>
                 </div>
                 
                 <div className="text-sm text-gray-500">

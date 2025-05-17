@@ -2,10 +2,10 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'rec
 
 const Dashboard = () => {
   const orderStats = {
-    new: 245,
-    pending: 123,
-    delivered: 150,
-    total: 518
+    new: 0,
+    pending: 0,
+    delivered: 0,
+    total: 0
   };
 
   const chartData = [

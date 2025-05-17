@@ -45,6 +45,7 @@ const Home = () => {
 
 
        {!productsLoading && !categoryLoading && categories?.map((cat) => {
+        // console.log(cat)
         const productsForCategory = products?.filter(
           (product) => product.category === cat._id
         );
@@ -54,6 +55,7 @@ const Home = () => {
             key={cat._id}
             products={productsForCategory}
             categoryName={cat.name}
+            categoryID={cat._id}
           />
         );
       })}

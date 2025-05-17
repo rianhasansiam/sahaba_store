@@ -159,10 +159,12 @@ const AllCategories = () => {
 
   return (
     <div>
+      <div className='flex justify-between items-center'>
+
       <h1 className="text-3xl font-bold mb-6">Category Management</h1>
 
       {/* Add Button */}
-      <div className="bg-white p-6 rounded-lg shadow mb-8">
+     
         <button
           onClick={() => {
             setShowModal(true);
@@ -173,6 +175,8 @@ const AllCategories = () => {
         >
           Add Category
         </button>
+   
+        
       </div>
 
       {/* Modal */}

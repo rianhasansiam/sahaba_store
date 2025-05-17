@@ -1,15 +1,21 @@
 import React, { useContext, useEffect, useState } from "react";
-import axios from "axios";
-import { HeartIcon } from "@heroicons/react/24/outline";
+import { HeartIcon, EyeIcon } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
 import { contextData } from "../Contex";
-
 import { toast } from "react-toastify";
 import api from "../hooks/api";
+import { useNavigate, useLocation } from "react-router-dom";
 
-const ProductCard = ({ products, categoryName }) => {
+// Utility to remove null/undefined values from an object
+function removeNulls(obj) {
+  return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== null && v !== undefined));
+}
+
+const ProductCard = ({ products, categoryName, categoryID }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { userData } = useContext(contextData);
-  const [wishlist, setWishlist] = useState({}); // Store wishlist as object with product IDs
+  const [wishlist, setWishlist] = useState({});
 
   useEffect(() => {
     const wishlistFromStorage = JSON.parse(localStorage.getItem("wishlist")) || {};
@@ -17,16 +23,23 @@ const ProductCard = ({ products, categoryName }) => {
   }, []);
 
   const handleAddtoCart = async (productId) => {
+    if (!userData) {
+      toast.error("You need to log in first.");
+      return;
+    }
     if (!userData?.email) {
       return toast.error("Please log in first");
     }
-
+    const pid = typeof productId === 'string' ? productId : String(productId || '');
+    const payload = removeNulls({
+      email: userData?.email,
+      productId: pid,
+    });
     try {
-      const response = await api.put("/add-to-cart", {
-        email: userData.email,
-        productId: productId,
-      });
-
+      const response = await api.put("/add-to-cart", payload);
+      const cart = JSON.parse(localStorage.getItem("addtocart")) || {};
+      cart[pid] = (cart[pid] || 0) + 1;
+      localStorage.setItem("addtocart", JSON.stringify(cart));
       toast.success(response.data.message);
     } catch (error) {
       console.error("Error adding to cart:", error);
@@ -35,106 +48,130 @@ const ProductCard = ({ products, categoryName }) => {
   };
 
   const handleAddToWishlist = async (productId) => {
+    if (!userData) {
+      toast.warn("You need to log in first.");
+      return;
+    }
     if (!userData?.email) {
       return toast.warn("Please log in first");
     }
-
     const storedWishlist = JSON.parse(localStorage.getItem("wishlist")) || {};
     const isInWishlist = storedWishlist[productId];
-
     if (isInWishlist) {
-      // REMOVE from wishlist
       try {
-        const response = await api.put("/remove-from-wishlist", {
+        const payload = removeNulls({
           email: userData.email,
           productId,
         });
-
+        const response = await api.put("/remove-from-wishlist", payload);
         const updatedWishlist = { ...storedWishlist };
         delete updatedWishlist[productId];
         localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
         setWishlist(updatedWishlist);
-
         toast.success(response.data.message || "Removed from wishlist");
       } catch (error) {
         console.error("Error removing from wishlist:", error);
-        toast.error(
-          error.response?.data?.message || "Failed to remove from wishlist"
-        );
+        toast.error(error.response?.data?.message || "Failed to remove from wishlist");
       }
     } else {
-      // ADD to wishlist
       try {
-        const response = await api.put("/add-to-wishlist", {
+        const payload = removeNulls({
           email: userData.email,
           productId,
         });
-
-        const updatedWishlist = {
-          ...storedWishlist,
-          [productId]: true,
-        };
-
+        const response = await api.put("/add-to-wishlist", payload);
+        const updatedWishlist = { ...storedWishlist, [productId]: true };
         localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
         setWishlist(updatedWishlist);
-
         toast.success(response.data.message || "Added to wishlist");
       } catch (error) {
         console.error("Error adding to wishlist:", error);
-        toast.error(
-          error.response?.data?.message || "Failed to add to wishlist"
-        );
+        toast.error(error.response?.data?.message || "Failed to add to wishlist");
       }
     }
+  };
+
+  const handleViewDetails = (productId) => {
+    navigate(`/product-details/${productId}`);
   };
 
   if (!products || products.length === 0) return null;
 
   return (
-    <div className="my-4 mx-[5vw] sm:mx-[10vw]  shadow-xl p-5 py-6 rounded-xl bg-white container lg:mx-auto">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-semibold">{categoryName}</h1>
-        <button className="px-4 py-2 bg-[#167389] text-white rounded-md hover:bg-[#347e8f]">
-          View More
-        </button>
+    <div className="my-4 mx-4 sm:mx-6 lg:mx-8 xl:mx-auto max-w-7xl shadow-lg p-4 sm:p-6 rounded-xl bg-white">
+      <div className="flex  sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+        <h1 className="text-lg sm:text-xl font-semibold text-gray-800">{categoryName}</h1>
+        {location.pathname === '/' && (
+          <button 
+            onClick={() => navigate(`/allproduct/${categoryID}`)} 
+            className="px-3 sm:px-4 py-1 sm:py-2 bg-[#167389] text-white rounded-md hover:bg-[#347e8f] text-sm sm:text-base"
+          >
+            View More
+          </button>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+      <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5">
         {products.map((item) => (
           <div
             key={item?._id}
-            className="bg-white rounded-lg shadow-md overflow-hidden"
+            className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden flex flex-col"
           >
-            <div className="relative">
+            <div className="relative group aspect-square">
               <img
-                className="w-full h-48 object-cover"
+                className="w-full h-full object-cover"
                 src={item?.image}
                 alt={item?.name}
+                loading="lazy"
               />
-
+              
+              {/* Wishlist button */}
               <button
                 onClick={() => handleAddToWishlist(item?._id)}
-                className="absolute top-2 right-2 text-gray-400 hover:text-red-500"
+                className="absolute top-2 right-2 text-gray-400 hover:text-red-500 z-10"
+                aria-label={wishlist[item._id] ? "Remove from wishlist" : "Add to wishlist"}
               >
                 {wishlist[item._id] ? (
-                  <HeartIconSolid className="h-6 w-6 text-red-500" />
+                  <HeartIconSolid className="h-5 w-5 sm:h-6 sm:w-6 text-red-500" />
                 ) : (
-                  <HeartIcon className="h-6 w-6" />
+                  <HeartIcon className="h-5 w-5 sm:h-6 sm:w-6" />
                 )}
               </button>
+              
+              {/* Quick view button overlay */}
+              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                <button
+                  onClick={() => handleViewDetails(item?._id)}
+                  className="bg-white rounded-full p-1.5 sm:p-2 shadow-lg hover:bg-gray-100 transition-colors"
+                  title="View Details"
+                  aria-label="View product details"
+                >
+                  <EyeIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-700" />
+                </button>
+              </div>
             </div>
 
-            <div className="p-4">
-              <h3 className="font-medium text-gray-900">{item?.name}</h3>
-              <p className="text-gray-500 text-sm">{item?.shortDescription}</p>
-              <div className="mt-3 flex justify-between items-center">
-                <span className="font-bold">${item.price}</span>
-                <button
-                  onClick={() => handleAddtoCart(item?._id)}
-                  className="text-[#167389] hover:text-[#135a6e] text-sm font-medium"
-                >
-                  Add to Cart
-                </button>
+            <div className="p-2 sm:p-3 flex-grow flex flex-col">
+              <h3 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-1 mb-1">{item?.name}</h3>
+              <p className="text-gray-500 text-xs sm:text-sm line-clamp-2 mb-2 sm:mb-3">{item?.shortDescription}</p>
+              <div className="mt-auto flex flex-col sm:flex-row justify-between items-center">
+
+                <span className="font-bold text-sm sm:text-base">{item.price} BDT</span>
+
+                <div className="flex gap-2 my-2 sm:my-0 sm:gap-2 ">
+                  <button
+                    onClick={() => handleViewDetails(item?._id)}
+                    className="text-xs sm:text-sm px-2 sm:px-3 py-0.5 sm:py-1 bg-gray-100 hover:bg-gray-200 rounded-md whitespace-nowrap"
+                  >
+                    Details
+                  </button>
+                  <button
+                    onClick={() => handleAddtoCart(item?._id)}
+                    className="text-xs sm:text-sm px-2 sm:px-3 py-0.5 sm:py-1 bg-[#167389] text-white hover:bg-[#135a6e] rounded-md whitespace-nowrap"
+                  >
+                    Add to Cart
+                  </button>
+                </div>
               </div>
             </div>
           </div>

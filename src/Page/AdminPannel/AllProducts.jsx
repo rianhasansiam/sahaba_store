@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { FaSearch } from 'react-icons/fa';
 import { useFetchData } from '../../hooks/useFetchData';
 import { usePostData } from '../../hooks/usePostData';
 import { useUpdateData } from '../../hooks/useUpdateData';
@@ -22,6 +23,7 @@ const AllProducts = () => {
   const [editMode, setEditMode] = useState(false);
   const [editId, setEditId] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(''); // Search state
 
   const fileInputRef = useRef(null);
   
@@ -40,50 +42,49 @@ const AllProducts = () => {
     setProductForm(prev => ({ ...prev, [name]: value }));
   };
 
-const handleImageUpload = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-  // Check if file is an image
-  if (!file.type.match('image.*')) {
-    toast.error('Please select an image file');
-    return;
-  }
-
-  // Check file size (5MB limit)
-  if (file.size > 5 * 1024 * 1024) {
-    toast.error('Image size should be less than 5MB');
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('image', file);
-
-  try {
-    setIsUploading(true);
-
-    // Upload to ImgBB
-    const imgbbResponse = await fetch(`https://api.imgbb.com/1/upload?key=${import.meta.env.VITE_IMGBB_API_KEY}`, {
-      method: 'POST',
-      body: formData,
-    });
-
-    const imgbbData = await imgbbResponse.json();
-
-    if (imgbbData.success) {
-      setProductForm(prev => ({ ...prev, image: imgbbData.data.url }));
-      toast.success('Image uploaded successfully!');
-    } else {
-      throw new Error(imgbbData.error?.message || 'Failed to upload image');
+    // Check if file is an image
+    if (!file.type.match('image.*')) {
+      toast.error('Please select an image file');
+      return;
     }
-  } catch (error) {
-    console.error('Image upload error:', error);
-    toast.error(error.message || 'Failed to upload image');
-  } finally {
-    setIsUploading(false);
-  }
-};
 
+    // Check file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size should be less than 5MB');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      setIsUploading(true);
+
+      // Upload to ImgBB
+      const imgbbResponse = await fetch(`https://api.imgbb.com/1/upload?key=${import.meta.env.VITE_IMGBB_API_KEY}`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const imgbbData = await imgbbResponse.json();
+
+      if (imgbbData.success) {
+        setProductForm(prev => ({ ...prev, image: imgbbData.data.url }));
+        toast.success('Image uploaded successfully!');
+      } else {
+        throw new Error(imgbbData.error?.message || 'Failed to upload image');
+      }
+    } catch (error) {
+      console.error('Image upload error:', error);
+      toast.error(error.message || 'Failed to upload image');
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const handleRemoveImage = () => {
     setProductForm(prev => ({ ...prev, image: '' }));
@@ -207,17 +208,41 @@ const handleImageUpload = async (e) => {
     return category?.name || 'Unknown Category';
   };
 
+  // Filter products by name, productId, or category name
+  const filteredProducts = products.filter(product => {
+    const name = product.name?.toLowerCase() || '';
+    const productId = product.productId?.toLowerCase() || '';
+    const categoryName = getCategoryName(product.category).toLowerCase();
+    return (
+      name.includes(searchTerm.toLowerCase()) ||
+      productId.includes(searchTerm.toLowerCase()) ||
+      categoryName.includes(searchTerm.toLowerCase())
+    );
+  });
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Product Management</h1>
         <button
           onClick={() => setShowModal(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          className="px-4 py-2 bg-[#167389] text-white rounded-md hover:bg-[#519fb1] transition-colors"
           disabled={isCategoriesLoading}
         >
           Add New Product
         </button>
+      </div>
+
+      {/* Search Bar */}
+      <div className="mb-4 flex items-center gap-2 max-w-md">
+        <FaSearch className="text-gray-500" />
+        <input
+          type="text"
+          placeholder="Search by name, product ID, or category..."
+          className="w-full px-4 py-2 border rounded-md"
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+        />
       </div>
 
       {/* Add/Edit Product Modal */}
@@ -280,7 +305,7 @@ const handleImageUpload = async (e) => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Price ($)
+                  Price (BDT)
                 </label>
                 <input
                   type="number"
@@ -420,7 +445,7 @@ const handleImageUpload = async (e) => {
           <div className="p-6 text-center text-red-500">
             Failed to load products. Please try again.
           </div>
-        ) : products.length === 0 ? (
+        ) : filteredProducts.length === 0 ? (
           <div className="p-6 text-center text-gray-500">
             No products found. Add your first product!
           </div>
@@ -456,7 +481,7 @@ const handleImageUpload = async (e) => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {products.map((product) => (
+                {filteredProducts.map((product) => (
                   <tr key={product._id}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {product.image ? (
@@ -486,7 +511,7 @@ const handleImageUpload = async (e) => {
                       {formatDate(product.createdAt)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ${parseFloat(product.price).toFixed(2)}
+                      {parseFloat(product.price).toFixed(2)} BDT
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <span className={`px-2 py-1 rounded-full text-xs ${
@@ -498,7 +523,7 @@ const handleImageUpload = async (e) => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 space-x-2">
                       <button
                         onClick={() => handleEdit(product)}
-                        className="text-blue-600 hover:text-blue-900"
+                        className="text-[#167389] hover:text-[#5da5b6]"
                       >
                         Edit
                       </button>
