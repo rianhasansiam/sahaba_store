@@ -146,14 +146,14 @@ const Register = () => {
   }, []);
 
   return (
-    <div className="login container mx-auto flex justify-center gap-20 my-10">
+    <div className="login container mx-auto flex flex-col lg:flex-row justify-center gap-20 my-10">
       {/* Image */}
-      <div className="w-[35%] rounded-l-3xl overflow-hidden">
+      <div className="lg:w-[35%] w-[90vw] max-sm:mx-auto  rounded-xl  lg:rounded-l-3xl overflow-hidden">
         <img className="h-full w-full" src={bgImg} alt="Register background" />
       </div>
 
       {/* Form */}
-      <div className="login__access !w-[40%]">
+      <div className="login__access w-[90vw] max-sm:mx-auto !lg:w-[40%]">
         <h1 className="text-2xl my-6 text-center font-semibold">Create your account.</h1>
         <div className="login__area">
           <form className="login__form" onSubmit={handleRegister}>
@@ -280,7 +280,7 @@ const Register = () => {
               className="login__input !bg-gray-100"
               pattern="[0-9]{10,15}"
             />
-            <label className="register__label absolute left-10 top-28 !font-semibold">Phone</label>
+            <label className="register__label absolute left-10 top-20 !font-semibold">Phone</label>
             <div className="modal-action mt-4">
               <button type="submit" className="btn bg-[#167389] text-white w-20">
                 OK

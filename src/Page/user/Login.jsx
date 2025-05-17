@@ -88,9 +88,9 @@ const Login = () => {
   }, []);
 
   return (
-    <div className="login container mx-auto flex justify-center gap-20 my-10">
+    <div className="login container mx-auto flex flex-col lg:flex-row justify-center gap-20 my-10">
       {/* LOGIN ACCESS */}
-      <div className="login__access !w-[40%]">
+      <div className="login__access w-[90vw] !lg:w-[40%] max-sm:mx-auto">
         <h1 className="text-2xl my-4 text-center font-semibold">Log in to your account.</h1>
 
         <div className="login__area">
@@ -168,7 +168,7 @@ const Login = () => {
       </div>
 
       {/* LOGIN IMAGE */}
-      <div className="w-[35%] rounded-r-3xl overflow-hidden">
+      <div className="lg:w-[35%] w-[90vw] max-sm:mx-auto rounded-xl  lg:rounded-r-3xl overflow-hidden">
         <img className="h-full w-full" src={bgImg} alt="Login Background" />
       </div>
     </div>
