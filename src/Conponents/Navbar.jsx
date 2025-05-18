@@ -131,14 +131,7 @@ const navigate=useNavigate()
             </li>
             <li>
               <NavLink
-                to="/wishlist"
-                onClick={e => {
-                  if (!userData) {
-                    e.preventDefault();
-                    toast.error('You need to log in first.');
-                  }
-                }}
-              >
+                to="/wishlist"  >
                 Wishlist
               </NavLink>
             </li>
@@ -152,29 +145,13 @@ const navigate=useNavigate()
         <div className="navbar-end text-white flex gap-5 text-xl items-center">
           <button
             className='block'
-            onClick={e => {
-              if (!userData) {
-                e.preventDefault();
-                toast.error('You need to log in first.');
-              } else {
-              
-                     navigate("/wishlist")
-              }
-            }}
+            onClick={() => {  navigate("/wishlist")}}
           >
             <i className="fa-solid fa-heart"></i>
           </button>
           <button
             className='block'
-            onClick={e => {
-              if (!userData) {
-                e.preventDefault();
-                toast.error('You need to log in first.');
-              } else {
-               
-                navigate("/addtocart")
-              }
-            }}
+            onClick={() => navigate("/addtocart")}
           >
             <i className="fa-solid fa-cart-shopping"></i>
           </button>

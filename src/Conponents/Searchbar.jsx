@@ -7,7 +7,7 @@ const Searchbar = () => {
   const { searchTerm, setSearchTerm } = useContext(contextData);
   return (
     <>
-      {location.pathname.startsWith('/allproduct/') && (
+      { (location.pathname === '/' || location.pathname.startsWith('/allproduct/')) && (
         <div className="form-control w-full max-w-xs sm:max-w-md md:max-w-lg mx-auto">
           <div className="input-group flex pb-5">
             <input

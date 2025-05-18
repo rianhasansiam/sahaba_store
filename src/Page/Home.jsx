@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
-import Banner from '../Conponents/Banner';
-import ProductCard from '../Conponents/ProductCard';
+
 import { useFetchData } from '../hooks/useFetchData';
-import CategoryCard from '../Conponents/CategoryCard';
+import HomepageCard from '../Conponents/HomepageCard';
+import Banner from '../Conponents/Banner';
+
 
 const Home = () => {
   const {
@@ -14,54 +15,52 @@ const Home = () => {
     staleTime: 10 * 60 * 1000,
   });
 
-  const {
-    data: categories,
-    isLoading: categoryLoading,
-    isError: categoryError,
-    refetch: refetchCategories
-  } = useFetchData('categories', '/allcategories', {
-    staleTime: 10 * 60 * 1000,
-  });
+  // Uncomment if you need categories
+  // const {
+  //   data: categories,
+  //   isLoading: categoryLoading,
+  //   isError: categoryError,
+  //   refetch: refetchCategories
+  // } = useFetchData('categories', '/allcategories', {
+  //   staleTime: 10 * 60 * 1000,
+  // });
 
   useEffect(() => {
     refetchProducts();
-    refetchCategories();
-  }, []);
+    // Uncomment if you need categories
+    // refetchCategories();
+  }, [refetchProducts]); // Added dependency
+
+  if (productsLoading) {
+    return <div className="text-center py-20">Loading products...</div>;
+  }
+
+  if (productsError) {
+    return <div className="text-center py-20 text-red-500">Error loading products</div>;
+  }
 
   return (
-    <div className='bg-[#f7f7f7] '>
-      <Banner />
-
-<h1 className='text-center font-bold text-4xl mt-10 lg:text-6xl'>All Category</h1>
-  <div className='flex gap-x-10 gap-y-4 my-10  container mx-auto flex-wrap justify-center'>
-       {categories?.map((eachCategory) => (
-  <CategoryCard  key={eachCategory._id} eachCategory={eachCategory} />
-))}
-  </div>
-
-
-
-   <div className='mb-20'>
+    <div className='bg-[#f7f7f7]'>
+ 
+     <Banner />
+      {/* Uncomment if you need categories section */}
+      {/* <h1 className='text-center font-bold text-4xl mt-10 lg:text-6xl'>All Category</h1>
+      <div className='flex gap-x-10 gap-y-4 my-10 container mx-auto flex-wrap justify-center'>
+        {categories?.map((eachCategory) => (
+          <CategoryCard key={eachCategory._id} eachCategory={eachCategory} />
+        ))}
+      </div> */}
 
 
-       {!productsLoading && !categoryLoading && categories?.map((cat) => {
-      
-        const productsForCategory = products?.filter(
-          (product) => product.category === cat._id
-        );
+      <h1 className='text-center text-3xl font-bold lg:text-4xl my-10 lg:mt-14'>All Product</h1>
 
-        return (
-          <ProductCard
-            key={cat._id}
-            products={productsForCategory}
-            categoryName={cat.name}
-            categoryID={cat._id}
-          />
-        );
-      })}
-   </div>
-
-
+      <div className='mb-20 container mx-auto px-4'>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {products?.map((product) => (
+            <HomepageCard key={product._id} product={product} />
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

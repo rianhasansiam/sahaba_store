@@ -23,24 +23,27 @@ const ProductCard = ({ products, categoryName, categoryID }) => {
   }, []);
 
   const handleAddtoCart = async (productId) => {
-    if (!userData) {
-      toast.error("You need to log in first.");
+    const pid = typeof productId === 'string' ? productId : String(productId || '');
+    const cart = JSON.parse(localStorage.getItem("addtocart")) || {};
+    if (cart[pid]) {
+      toast.info("Already product add to cart");
       return;
     }
-    if (!userData?.email) {
-      return toast.error("Please log in first");
-    }
-    const pid = typeof productId === 'string' ? productId : String(productId || '');
     const payload = removeNulls({
       email: userData?.email,
       productId: pid,
     });
     try {
-      const response = await api.put("/add-to-cart", payload);
-      const cart = JSON.parse(localStorage.getItem("addtocart")) || {};
-      cart[pid] = (cart[pid] || 0) + 1;
+      // Always update localStorage
+      cart[pid] = 1;
       localStorage.setItem("addtocart", JSON.stringify(cart));
-      toast.success(response.data.message);
+      // If userData available, sync with backend
+      if (userData && userData.email) {
+        const response = await api.put("/add-to-cart", payload);
+        toast.success(response.data.message || "Added to cart");
+      } else {
+        toast.success("Added to cart (local only)");
+      }
     } catch (error) {
       console.error("Error adding to cart:", error);
       toast.error(error.response?.data?.message || "Failed to add to cart");
@@ -48,46 +51,27 @@ const ProductCard = ({ products, categoryName, categoryID }) => {
   };
 
   const handleAddToWishlist = async (productId) => {
-    if (!userData) {
-      toast.warn("You need to log in first.");
-      return;
-    }
-    if (!userData?.email) {
-      return toast.warn("Please log in first");
-    }
     const storedWishlist = JSON.parse(localStorage.getItem("wishlist")) || {};
     const isInWishlist = storedWishlist[productId];
     if (isInWishlist) {
-      try {
-        const payload = removeNulls({
-          email: userData.email,
-          productId,
-        });
-        const response = await api.put("/remove-from-wishlist", payload);
-        const updatedWishlist = { ...storedWishlist };
-        delete updatedWishlist[productId];
-        localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
-        setWishlist(updatedWishlist);
-        toast.success(response.data.message || "Removed from wishlist");
-      } catch (error) {
-        console.error("Error removing from wishlist:", error);
-        toast.error(error.response?.data?.message || "Failed to remove from wishlist");
+      toast.info("Already product add to wishlist");
+      return;
+    }
+    try {
+      let updatedWishlist;
+      // Add to wishlist (local)
+      updatedWishlist = { ...storedWishlist, [productId]: true };
+      localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
+      setWishlist(updatedWishlist);
+      // If userData available, sync with backend
+      if (userData && userData.email) {
+        const payload = removeNulls({ email: userData.email, productId });
+        await api.put("/add-to-wishlist", payload);
       }
-    } else {
-      try {
-        const payload = removeNulls({
-          email: userData.email,
-          productId,
-        });
-        const response = await api.put("/add-to-wishlist", payload);
-        const updatedWishlist = { ...storedWishlist, [productId]: true };
-        localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
-        setWishlist(updatedWishlist);
-        toast.success(response.data.message || "Added to wishlist");
-      } catch (error) {
-        console.error("Error adding to wishlist:", error);
-        toast.error(error.response?.data?.message || "Failed to add to wishlist");
-      }
+      toast.success("Added to wishlist");
+    } catch (error) {
+      console.error("Wishlist error:", error);
+      toast.error(error.response?.data?.message || "Operation failed");
     }
   };
 
