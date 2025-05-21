@@ -1,12 +1,15 @@
 import LoadingPage from '../../Conponents/LoadingPage';
 import { useFetchData } from '../../hooks/useFetchData';
 import { useUpdateData } from '../../hooks/useUpdateData';
+import { useDeleteData } from '../../hooks/useDeleteData';
 import { useState } from 'react';
 import { FaSearch } from 'react-icons/fa';
+import Swal from 'sweetalert2';
 
 const AllOrders = () => {
   const { data, isLoading, error } = useFetchData('orders', '/orders');
   const { mutate: updateOrderStatus, isLoading: isUpdating } = useUpdateData('/orders');
+  const deleteOrder = useDeleteData('delete-order');
 
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -26,6 +29,38 @@ const AllOrders = () => {
   const handleStatusChange = (orderId, newStatus) => {
     updateOrderStatus({ id: orderId, data: { status: newStatus } }); // Only send status
   };
+  
+  const handleDeleteOrder = (orderId) => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteOrder.mutate(orderId, {
+          onSuccess: () => {
+            Swal.fire(
+              'Deleted!',
+              'Order has been deleted.',
+              'success'
+            );
+          },
+          onError: (error) => {
+            console.error("Error deleting order:", error);
+            Swal.fire(
+              'Error!',
+              'Failed to delete order.',
+              'error'
+            );
+          }
+        });
+      }
+    });
+  };
 
   if (isLoading) return <LoadingPage></LoadingPage>
   if (error) return <div className="p-8 text-lg text-red-600">Failed to load orders.</div>;
@@ -44,7 +79,7 @@ const AllOrders = () => {
           onChange={e => setSearchTerm(e.target.value)}
         />
       </div>
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-lg shadow overflow-scroll">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -83,10 +118,15 @@ const AllOrders = () => {
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
                     {order.products?.length > 0 ? (
-                      <ul className="list-disc pl-5">
-                        {order.products.map((product, idx) => (
-                          <li key={idx}>
-                            {product.name} (×{product.quantity})
+                      <ul className="list-disc pl-5">                        {order.products.map((product, idx) => (
+                          <li key={idx} className="mb-1">
+                            <span className="inline-flex items-center">
+                              <span className="bg-gray-100 text-gray-800 text-xs px-2  py-0.5 rounded-full mr-1">
+                                {product.size || "Standard"}
+                              </span>
+                              <span>{product.name}</span>
+                              <span className="ml-1 text-gray-600">(×{product.quantity})</span>
+                            </span>
                           </li>
                         ))}
                       </ul>
@@ -107,10 +147,13 @@ const AllOrders = () => {
                       <option value="delivered">Delivered</option>
                       <option value="cancelled">Cancelled</option>
                     </select>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <button className="text-red-600 hover:text-red-900">
-                      Delete
+                  </td>                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <button 
+                      onClick={() => handleDeleteOrder(order._id)} 
+                      className="text-red-600 hover:text-red-900 px-3 py-1 border border-red-300 rounded hover:bg-red-50 transition-colors"
+                      disabled={deleteOrder.isLoading}
+                    >
+                      {deleteOrder.isLoading ? 'Deleting...' : 'Delete'}
                     </button>
                   </td>
                 </tr>

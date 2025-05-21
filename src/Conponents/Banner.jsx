@@ -1,21 +1,22 @@
-
-
-import { Swiper, SwiperSlide } from 'swiper/react';
-
-
-import 'swiper/css';
-import 'swiper/css/pagination';
-import 'swiper/css/navigation';
-
-import { Autoplay, Pagination, Navigation } from 'swiper/modules';
-import banner1 from '../assets/img/Banner1.png'
-import banner3 from '../assets/img/Banner3.png'
-import banner2 from '../assets/img/Banner2.png'
-
+import React from 'react';
+import banner from '../assets/img/Banner.png';
 
 const Banner = () => {
     return (
-        <div >
+        <div className="relative">
+            {/* Single static banner instead of Swiper */}
+            <img className='container mx-auto max-md:w-[95vw] lg:h-[65vh] object-cover mt-1 rounded-xl' src={banner} alt="Sahaba Store Banner" />
+            
+            {/* Uncomment if you want overlay text
+            <div className='text-white absolute inset-0 flex flex-col justify-center items-center text-center bg-black bg-opacity-50'>
+                <h1 className='text-4xl md:text-6xl font-bold mb-4'>Welcome to Sahaba Store</h1>
+                <p className='text-xl md:text-2xl font-semibold w-[90%] md:w-[60%] mx-auto'>
+                    Quality Products at Affordable Prices
+                </p>
+            </div>
+            */}
+            
+            {/* Original Swiper implementation (commented out)
             <Swiper
                 spaceBetween={30}
                 centeredSlides={true}
@@ -31,51 +32,21 @@ const Banner = () => {
                 className="mySwiper relative"
             >
                 <SwiperSlide>
-                    <img className='w-[100vw] h-[70vh] object-fill  ' src={banner1} alt="" />
-                    {/* <div className='text-white absolute h-[75vh] w-[100vw] z-20 top-0 text-center bg-black bg-opacity-65 '>
-                        <h1 className='mt-60 text-6xl font-bold'>Scholarship Application Deadline Alert</h1>
-                        <p className='mt-6 text-2xl font-semibold w-[40%] mx-auto'>Hurry Up! Final Call to Apply for Scholarships at Top Universities – Application Deadline Approaching Fast!</p>
-                    </div> */}
+                    <img className='w-[100vw] h-[70vh] object-fill' src={banner1} alt="" />
                 </SwiperSlide>
                 <SwiperSlide>
-                    <img className='w-[100vw] h-[70vh] object-fill  ' src={banner3} alt="" />
-                    {/* <div className='text-white absolute h-[75vh] w-[100vw] z-20 top-0 text-center bg-black bg-opacity-65'>
-                        <h1 className='mt-60 text-6xl font-bold'> Early Bird Scholarship</h1>
-                        <p className='mt-6 text-2xl font-semibold w-[40%] mx-auto'>Apply Now and Get an Early Bird Scholarship – Secure Your Spot Before It's Too Late!</p>
-                    </div> */}
+                    <img className='w-[100vw] h-[70vh] object-fill' src={banner3} alt="" />
                 </SwiperSlide>
-                 <SwiperSlide>
-                    <img className='w-[100vw] h-[70vh] object-cover  ' src={banner1} alt="" />
-                    {/* <div className='text-white absolute h-[75vh] w-[100vw] z-20 top-0 text-center bg-black bg-opacity-65 '>
-                        <h1 className='mt-60 text-6xl font-bold'>Top Merit-Based Scholarships</h1>
-                        <p className='mt-6 text-2xl font-semibold w-[40%] mx-auto'>Merit-Based Scholarships Available – Unlock Up to 100% Tuition Coverage for High Achievers!</p>
-                    </div> */}
-                </SwiperSlide>
-
-
                 <SwiperSlide>
-                    <img className='w-[100vw] h-[70vh] object-fill  ' src={banner2} alt="" />
-                    {/* <div className='text-white absolute h-[75vh] w-[100vw] z-20 top-0 text-center bg-black bg-opacity-65 '>
-                        <h1 className='mt-60 text-6xl font-bold'>Exclusive Partner University Scholarships</h1>
-                        <p className='mt-6 text-2xl font-semibold w-[40%] mx-auto'>Exclusive Scholarships Available – Partner Universities Offering Up to 50% Tuition Fee Waivers!</p>
-                    </div> */}
+                    <img className='w-[100vw] h-[70vh] object-cover' src={banner1} alt="" />
                 </SwiperSlide>
-               
-
-
-
-
-
+                <SwiperSlide>
+                    <img className='w-[100vw] h-[70vh] object-fill' src={banner2} alt="" />
+                </SwiperSlide>
             </Swiper>
-
-
-
-
-
+            */}
         </div>
-    )
-}
+    );
+};
 
-Banner.propTypes = {}
-
-export default Banner
+export default Banner;

@@ -1,81 +1,40 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import { useFetchData } from '../hooks/useFetchData';
 import { HeartIcon, ShoppingCartIcon } from '@heroicons/react/24/solid';
 import { toast } from 'react-toastify';
-import { contextData } from '../Contex';
-import api from '../hooks/api';
 import LoadingPage from './LoadingPage';
+import { removeFromWishlist } from '../hooks/wishlistUtils';
 
-const WishlishtEachcard = ({ id, setreload, reload }) => {
-    const {userData} =useContext(contextData)
-  const {
-    data: product,
-    isLoading,
-    isError,
-    error,
-    refetch,
-  } = useFetchData(['eachproduct', id], `/eachproduct/${id?.productId}`, {
-    staleTime: 10 * 60 * 1000,
-  });
-
-  if (isLoading) {
-    return  <LoadingPage></LoadingPage>
+const WishlishtEachcard = ({ product, id, setreload, reload }) => {
+  if (!product) {
+    return <LoadingPage />;
   }
-
-  // if (isError) {
-  //   return <p className="text-center text-red-500 py-4">Error: {error.message}</p>;
-  // }
-
-
-
-  // Handle remove to Wishlist
-  const handleRemoveToWishlist = async (productId) => {
-    if (!userData?.email) {
-      return toast.warn("Please log in first");
-    }
-
-    try {
-      const response = await api.put("/remove-from-wishlist", {
-        email: userData.email,
-        productId: productId,
-      });
-      // Remove from localStorage as well
-      let wishlist = JSON.parse(localStorage.getItem("wishlist"));
-      if (Array.isArray(wishlist)) {
-        wishlist = wishlist.filter(id => id !== productId);
-        localStorage.setItem("wishlist", JSON.stringify(wishlist));
-      } else if (wishlist && typeof wishlist === 'object') {
-        // If stored as object (for compatibility)
-        delete wishlist[productId];
-        localStorage.setItem("wishlist", JSON.stringify(wishlist));
-      }
+  // Handle remove from Wishlist
+  const handleRemoveToWishlist = (productId) => {
+    const success = removeFromWishlist(productId);
+    if (success) {
       setreload(!reload);
-      toast.success(response.data.message);
-    } catch (error) {
-      console.error("Error adding to wishlist:", error);
-      toast.error(error.response?.data?.message || "Failed to add to wishlist");
-    }
-};
-
-const handleAddtoCart = async (productId) => {
-    if (!userData?.email) {
-      return toast.error("Please log in first");
-    }
-
-    try {
-      const response = await api.put("/add-to-cart", {
-        email: userData.email,
-        productId: productId,
-      });
-
-      toast.success(response.data.message);
-    } catch (error) {
-      console.error("Error adding to cart:", error);
-      toast.error(error.response?.data?.message || "Failed to add to cart");
     }
   };
 
+  const handleAddtoCart = (productId) => {
+    try {
+      // Get current cart
+      let cart = JSON.parse(localStorage.getItem("addtocart")) || {};
+      
+      // Add to cart with default quantity and size
+      if (!cart[productId]) {
+        cart[productId] = { quantity: 1, size: "250 ml" };
+        localStorage.setItem("addtocart", JSON.stringify(cart));
+        toast.success("Item added to cart");
+      } else {
+        toast.info("Item already in cart");
+      }
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      toast.error("Failed to add to cart");
+    }
+  };
 
 
   return (
@@ -93,14 +52,20 @@ const handleAddtoCart = async (productId) => {
             <h3 className="text-lg font-medium text-gray-900">{product?.name}</h3>
             <p className="text-gray-500">{product?.shortDescription}</p>
           </div>
-          <button onClick={()=>handleRemoveToWishlist(id?.productId)} className=" text-red-500">
+          <button 
+            onClick={() => handleRemoveToWishlist(id?.productId || id)} 
+            className="text-red-500"
+          >
             <HeartIcon className="h-6 w-6" />
           </button>
         </div>
 
         <div className="mt-4 flex justify-between items-center">
           <span className="text-lg font-bold">{product?.price} BDT</span>
-          <button onClick={()=>(handleAddtoCart(id?.productId))} className="bg-[#167389] hover:bg-[#135a6e] text-white px-4 py-2 rounded-md flex items-center">
+          <button 
+            onClick={() => handleAddtoCart(id?.productId || id)} 
+            className="bg-[#22874b] hover:bg-[#135a6e] text-white px-4 py-2 rounded-md flex items-center"
+          >
             Add to Cart <ShoppingCartIcon className="ml-2 h-5 w-5" />
           </button>
         </div>
@@ -110,7 +75,10 @@ const handleAddtoCart = async (productId) => {
 };
 
 WishlishtEachcard.propTypes = {
-  id: PropTypes.string.isRequired,
+  product: PropTypes.object,
+  id: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
+  setreload: PropTypes.func.isRequired,
+  reload: PropTypes.bool
 };
 
 export default WishlishtEachcard;

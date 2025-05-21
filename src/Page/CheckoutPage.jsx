@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { contextData } from '../Contex';
 import { usePostData } from '../hooks/usePostData';
 import Swal from 'sweetalert2';
+import ProductSizeTag from '../Conponents/ProductSizeTag';
 
 const CheckoutPage = () => {
   const { 
@@ -104,35 +105,34 @@ const CheckoutPage = () => {
       payment: {
         method: formData.paymentMethod,
         status: formData.paymentMethod === 'cash-on-delivery' ? 'pending' : 'paid',
-      },
-      products: checkoutProducts.map(product => ({
+      },      products: checkoutProducts.map(product => ({
         productId: product.id || product.productId,
         name: product.name,
         price: product.price,
         quantity: product.quantity,
-        image: product.image
+        image: product.image,
+        size: product.size || "250 ml", // Ensure size is included
+        totalPrice: (product.price * product.quantity) // Calculate total price per product
       })),
       orderTotal: finalPrice,
      
       createdAt: new Date().toISOString()
-    };
-
-    try {
-      await postOrder.mutateAsync(orderData);
+    };    try {
+      const response = await postOrder.mutateAsync(orderData);
       
       // Clear cart on successful order
       if (clearCart) {
         clearCart();
-      }
-
-      Swal.fire({
+      }      Swal.fire({
         icon: 'success',
         title: 'Order Placed!',
-        text: `Your order #${orderData._id || ''} has been placed successfully`,
-        confirmButtonText: 'View Order'
+        text: `Your order #${response?.data?._id || ''} has been placed successfully`,
+        showCancelButton: true,
+        confirmButtonText: 'View Order Details',
+        cancelButtonText: 'Continue Shopping'
       }).then((result) => {
         if (result.isConfirmed) {
-          navigate('/orderOverview', { state: { order: orderData } });
+          navigate('/orderOverview', { state: { order: response?.data || orderData } });
         } else {
           navigate('/');
         }
@@ -153,23 +153,30 @@ const CheckoutPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
+
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Checkout</h1>
-          <div className="flex justify-center mt-4">
-            <div className="flex items-center">
-              <div className="flex items-center">
-                <div className="w-8 h-8 rounded-full bg-[#167389] flex items-center justify-center">
+
+          <div className="flex justify-center mt-4 ">
+
+            <div className="flex items-center flex-wrap justify-center">
+
+              <div className="flex items-center ">
+                <div className="w-8 h-8 rounded-full bg-[#22874b] flex items-center justify-center ">
                   <span className="text-white">1</span>
                 </div>
                 <span className="ml-2 text-sm font-medium">Shopping Cart</span>
               </div>
               <div className="mx-4 h-px w-16 bg-gray-300"></div>
               <div className="flex items-center">
-                <div className="w-8 h-8 rounded-full border-2 border-[#167389] flex items-center justify-center">
-                  <span className="text-[#167389]">2</span>
+                <div className="w-8 h-8 rounded-full border-2 border-[#22874b] flex items-center justify-center">
+                  <span className="text-[#22874b]">2</span>
                 </div>
-                <span className="ml-2 text-sm font-medium text-[#167389]">Checkout</span>
+                <span className="ml-2 text-sm font-medium text-[#22874b]">Checkout</span>
               </div>
+
+
+
               <div className="mx-4 h-px w-16 bg-gray-300"></div>
               <div className="flex items-center">
                 <div className="w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center">
@@ -199,7 +206,7 @@ const CheckoutPage = () => {
                       name="firstName"
                       value={formData.firstName}
                       onChange={handleChange}
-                      className={`w-full border ${formErrors.firstName ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#167389]`}
+                      className={`w-full border ${formErrors.firstName ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#22874b]`}
                       required
                     />
                     {formErrors.firstName && (
@@ -216,7 +223,7 @@ const CheckoutPage = () => {
                       name="lastName"
                       value={formData.lastName}
                       onChange={handleChange}
-                      className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#167389]"
+                      className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#22874b]"
                     />
                   </div>
                 </div>
@@ -231,7 +238,7 @@ const CheckoutPage = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className={`w-full border ${formErrors.email ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#167389]`}
+                    className={`w-full border ${formErrors.email ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#22874b]`}
                     required
                   />
                   {formErrors.email && (
@@ -249,7 +256,7 @@ const CheckoutPage = () => {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    className={`w-full border ${formErrors.phone ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#167389]`}
+                    className={`w-full border ${formErrors.phone ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#22874b]`}
                     required
                   />
                   {formErrors.phone && (
@@ -267,7 +274,7 @@ const CheckoutPage = () => {
                     name="address"
                     value={formData.address}
                     onChange={handleChange}
-                    className={`w-full border ${formErrors.address ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#167389]`}
+                    className={`w-full border ${formErrors.address ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#22874b]`}
                     required
                   />
                   {formErrors.address && (
@@ -286,7 +293,7 @@ const CheckoutPage = () => {
                       name="city"
                       value={formData.city}
                       onChange={handleChange}
-                      className={`w-full border ${formErrors.city ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#167389]`}
+                      className={`w-full border ${formErrors.city ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#22874b]`}
                       required
                     />
                     {formErrors.city && (
@@ -303,13 +310,11 @@ const CheckoutPage = () => {
                       name="country"
                       value={formData.country}
                       onChange={handleChange}
-                      className={`w-full border ${formErrors.country ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#167389]`}
+                      className={`w-full border ${formErrors.country ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#22874b]`}
                       required
                     >
                       <option value="Bangladesh">Bangladesh</option>
-                      <option value="India">India</option>
-                      <option value="Pakistan">Pakistan</option>
-                      <option value="Other">Other</option>
+                     
                     </select>
                   </div>
                  
@@ -323,7 +328,7 @@ const CheckoutPage = () => {
                       name="zipCode"
                       value={formData.zipCode}
                       onChange={handleChange}
-                      className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#167389]"
+                      className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#22874b]"
                     />
                   </div>
                 </div>
@@ -339,13 +344,13 @@ const CheckoutPage = () => {
                         value="cash-on-delivery"
                         checked={formData.paymentMethod === 'cash-on-delivery'}
                         onChange={handleChange}
-                        className="h-4 w-4 text-[#167389] focus:ring-[#167389] border-gray-300"
+                        className="h-4 w-4 text-[#22874b] focus:ring-[#22874b] border-gray-300"
                       />
                       <label htmlFor="cash-on-delivery" className="ml-2 block text-sm text-gray-700">
                         Cash On Delivery
                       </label>
                     </div>
-                    <div className="flex items-center">
+                    {/* <div className="flex items-center">
                       <input
                         type="radio"
                         id="bkash"
@@ -353,12 +358,12 @@ const CheckoutPage = () => {
                         value="bkash"
                         checked={formData.paymentMethod === 'bkash'}
                         onChange={handleChange}
-                        className="h-4 w-4 text-[#167389] focus:ring-[#167389] border-gray-300"
+                        className="h-4 w-4 text-[#22874b] focus:ring-[#22874b] border-gray-300"
                       />
                       <label htmlFor="bkash" className="ml-2 block text-sm text-gray-700">
                         bKash
                       </label>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </div>
@@ -377,12 +382,17 @@ const CheckoutPage = () => {
                         alt={product.name} 
                         className="w-20 h-20 rounded-md object-cover" 
                       />
-                    </div>
-                    <div className="ml-4 flex-1">
+                    </div>                    <div className="ml-4 flex-1">
                       <div className="flex justify-between">
                         <h3 className="text-sm font-medium text-gray-900">{product.name}</h3>
                         <p className="ml-4 text-sm font-medium text-gray-900">৳{product.price.toFixed(2)}</p>
                       </div>
+                      <p className="text-sm text-gray-500 flex items-center">
+                        <ProductSizeTag size={product.size} className="mr-2" />
+                        {product.size && product.size !== "250 ml" && (
+                          <span className="text-xs text-amber-600">(Size-adjusted price)</span>
+                        )}
+                      </p>
                       <p className="text-sm text-gray-500">Quantity: {product.quantity}</p>
                       <p className="text-sm text-gray-500">Subtotal: ৳{(product.price * product.quantity).toFixed(2)}</p>
                     </div>
@@ -411,7 +421,7 @@ const CheckoutPage = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting || checkoutProducts.length === 0}
-                  className={`w-full bg-[#167389] hover:bg-[#135a6e] text-white py-3 px-4 rounded-md font-medium ${(isSubmitting || checkoutProducts.length === 0) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`w-full bg-[#22874b] hover:bg-[#135a6e] text-white py-3 px-4 rounded-md font-medium ${(isSubmitting || checkoutProducts.length === 0) ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   {isSubmitting ? (
                     <span className="flex items-center justify-center">
@@ -429,11 +439,11 @@ const CheckoutPage = () => {
 
               <div className="mt-4 text-center text-sm text-gray-500">
                 By placing your order, you agree to our{' '}
-                <Link to="/terms" className="text-[#167389] hover:text-[#135a6e]">
+                <Link to="/terms" className="text-[#22874b] hover:text-[#135a6e]">
                   Terms of Service
                 </Link>{' '}
                 and{' '}
-                <Link to="/privacy" className="text-[#167389] hover:text-[#135a6e]">
+                <Link to="/privacy" className="text-[#22874b] hover:text-[#135a6e]">
                   Privacy Policy
                 </Link>.
               </div>

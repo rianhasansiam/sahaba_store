@@ -1,15 +1,17 @@
 import { useParams } from 'react-router-dom';
 import { useFetchData } from '../hooks/useFetchData';
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext, useEffect, useMemo } from 'react';
 import { FaStar, FaShoppingCart, FaHeart, FaShare } from 'react-icons/fa';
 import { contextData } from '../Contex';
 import api from '../hooks/api';
 import { toast } from 'react-toastify';
 import LoadingPage from '../Conponents/LoadingPage';
+import ProductSizeTag from '../Conponents/ProductSizeTag';
 
 const ProductDetails = () => {
   const { id } = useParams();
   const [quantity, setQuantity] = useState(1);
+  const [selectedSize, setSelectedSize] = useState("250 ml");
   const { data: product, isLoading, error } = useFetchData(
     'product',
     `/products/${id}`
@@ -17,6 +19,35 @@ const ProductDetails = () => {
   const { userData } = useContext(contextData);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  
+  // Available size options - memoized to avoid unnecessary re-renders
+  const availableSizes = useMemo(() => ["250 ml", "500 ml", "1000 ml"], []);
+
+  // Calculate price based on size
+  const getPriceBasedOnSize = (basePrice, size) => {
+    const price = parseFloat(basePrice);
+    if (!price) return 0;
+    
+    let multiplier = 1;
+    switch(size) {
+      case "500 ml":
+        multiplier = 1.8; // 80% more for double size
+        break;
+      case "1000 ml":
+        multiplier = 3; // 3x price for 1 liter
+        break;
+      default: // 250 ml
+        multiplier = 1;
+    }
+    
+    return price * multiplier;
+  };
+  
+  // Calculated size-adjusted price
+  const adjustedPrice = useMemo(() => {
+    if (!product?.price) return 0;
+    return getPriceBasedOnSize(product.price, selectedSize);
+  }, [product, selectedSize]);
 
   // Check if product is in wishlist
   useEffect(() => {
@@ -62,12 +93,23 @@ const ProductDetails = () => {
     }
   };
 
-  const handleAddToCart = async () => {
-    if (!userData) {
-      toast.warn('Please login to add items to cart');
+  const handleQuantityChange = (newQuantity) => {
+    if (newQuantity < 1) {
+      toast.error("Quantity cannot be less than 1");
       return;
     }
 
+    if (product.availableAmount !== undefined && newQuantity > product.availableAmount) {
+      toast.error(`Only ${product.availableAmount} items available in stock`);
+      return;
+    }
+
+    setQuantity(newQuantity);
+  };
+
+  const handleAddToCart = async () => {
+    if (!product) return;
+    
     if (product.availableAmount <= 0) {
       toast.error('This product is out of stock');
       return;
@@ -75,18 +117,33 @@ const ProductDetails = () => {
 
     setIsAddingToCart(true);
     try {
-      await api.put('/add-to-cart', {
-        email: userData.email,
-        productId: product._id,
-        quantity
-      });
+      // Get current cart data
+      const cartData = JSON.parse(localStorage.getItem('addtocart')) || {};
+      
+      // Update cart with size and quantity data
+      cartData[product._id] = {
+        quantity: quantity,
+        size: selectedSize
+      };
+      
+      // Save to localStorage
+      localStorage.setItem('addtocart', JSON.stringify(cartData));
+      
+      // Also update API if user is logged in
+      if (userData) {
+        await api.put('/add-to-cart', {
+          email: userData.email,
+          productId: product._id,
+          quantity,
+          size: selectedSize
+        });
+      }
 
-      // Update local cart storage
-      const cart = JSON.parse(localStorage.getItem('addtocart')) || {};
-      cart[product._id] = (cart[product._id] || 0) + quantity;
-      localStorage.setItem('addtocart', JSON.stringify(cart));
-
-      toast.success(`${quantity} ${product.name} added to cart`);
+      // Show success message with size information
+      toast.success(`${quantity} ${product.name} (${selectedSize}) added to cart`);
+      
+      // Trigger storage event for other components to detect the change
+      window.dispatchEvent(new Event('storage'));
     } catch (err) {
       console.error('Add to cart error:', err);
       toast.error(err.response?.data?.message || 'Failed to add to cart');
@@ -95,7 +152,7 @@ const ProductDetails = () => {
     }
   };
 
-  if (isLoading) return <LoadingPage></LoadingPage>
+  if (isLoading) return <LoadingPage />;
   if (error) return <div className="text-center py-20 text-red-500">Error loading product</div>;
   if (!product) return <div className="text-center py-20">Product not found</div>;
 
@@ -142,11 +199,18 @@ const ProductDetails = () => {
           </div>
 
           <div className="mb-6">
-            <span className="text-3xl font-bold text-gray-900">{product.price} BDT</span>
+            <span className="text-3xl font-bold text-gray-900">
+              {adjustedPrice.toFixed(2)} BDT
+            </span>
             {product.originalPrice && (
               <span className="ml-2 text-lg text-gray-500 line-through">
                 {product.originalPrice} BDT
               </span>
+            )}
+            {selectedSize !== "250 ml" && (
+              <p className="text-sm text-gray-500 mt-1">
+                Size-adjusted price for {selectedSize}
+              </p>
             )}
           </div>
 
@@ -169,20 +233,68 @@ const ProductDetails = () => {
               </span>
             </div>
           </div>
+          
+          {/* Size Selection */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-2">Select Size</h3>
+            <div className="grid grid-cols-3 gap-2">
+              {availableSizes.map((size) => (
+                <button
+                  key={size}
+                  onClick={() => setSelectedSize(size)}
+                  className={`py-2 px-3 border rounded-md flex items-center justify-center gap-1 ${
+                    selectedSize === size
+                      ? 'bg-[#22874b] text-white border-[#22874b]'
+                      : 'bg-white text-gray-700 border-gray-300 hover:border-[#22874b]'
+                  }`}
+                >
+                  <ProductSizeTag 
+                    size={size} 
+                    className={selectedSize === size ? "!bg-white !text-[#22874b]" : ""} 
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {/* Quantity Selection */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-2">Quantity</h3>
+            <div className="flex items-center">
+              <button
+                onClick={() => handleQuantityChange(Math.max(1, quantity - 1))}
+                className="border border-gray-300 rounded-l-md px-4 py-2 hover:bg-gray-100 transition-colors"
+                disabled={quantity <= 1}
+              >
+                -
+              </button>
+              <span className="border-t border-b border-gray-300 px-6 py-2 min-w-[60px] text-center font-medium">
+                {quantity}
+              </span>
+              <button
+                onClick={() => handleQuantityChange(quantity + 1)}
+                className={`border border-gray-300 rounded-r-md px-4 py-2 hover:bg-gray-100 transition-colors ${
+                  product.availableAmount && quantity >= product.availableAmount ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                disabled={product.availableAmount && quantity >= product.availableAmount}
+              >
+                +
+              </button>
+            </div>
+          </div>
 
           <div className="flex items-center mb-8">
-           
             <button 
               onClick={handleAddToCart}
               className={`flex-1 text-white py-3 px-6 rounded-lg flex items-center justify-center gap-2 ${
                 product.availableAmount <= 0 
                   ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-[#167389] hover:bg-[#479aac]'
+                  : 'bg-[#22874b] hover:bg-[#479aac]'
               }`}
               disabled={product.availableAmount <= 0 || isAddingToCart}
             >
               <FaShoppingCart /> 
-              {isAddingToCart ? 'Adding...' : 'Add to Cart'}
+              {isAddingToCart ? 'Adding...' : `Add to Cart (${selectedSize})`}
             </button>
           </div>
 
@@ -197,7 +309,7 @@ const ProductDetails = () => {
       <div className="mt-16">
         <div className="border-b border-gray-200">
           <nav className="flex space-x-8">
-            <button className="py-4 px-1 border-b-2 font-medium text-sm border-[#167389] text-[#167389]">
+            <button className="py-4 px-1 border-b-2 font-medium text-sm border-[#22874b] text-[#22874b]">
               Description
             </button>
             <button className="py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">

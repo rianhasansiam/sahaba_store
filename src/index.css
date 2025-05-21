@@ -6,7 +6,7 @@
 @tailwind utilities;
 
 a.active{
-    background-color: #116072 !important;
+    background-color: #22874b !important;
     color: white !important;
     font-weight: bold;
 
@@ -99,7 +99,7 @@ img {
   width: 100%;
   display: inline-flex;
   justify-content: center;
-  background-color: #167389;
+  background-color: #22874b;
   color: white;
   font-weight: var(--font-semi-bold);
   padding-block: 1.5rem;
@@ -166,7 +166,7 @@ img {
 
 
  /* select option:hover {
-    background-color: #167389 !important;
+    background-color: #22874b !important;
     color: white !important;
   } */
 

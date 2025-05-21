@@ -74,7 +74,7 @@ const handleDelete = (id) => {
       <h1 className="text-3xl font-bold mb-6">Users Management </h1>
 
       
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-lg shadow overflow-scroll">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>

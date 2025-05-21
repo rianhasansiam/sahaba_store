@@ -15,6 +15,7 @@ const HomepageCard = ({ product }) => {
   const navigate = useNavigate();
   const { userData, searchTerm } = useContext(contextData);
   const [wishlist, setWishlist] = useState({});
+    const [isHovered, setIsHovered] = useState(false);
 
   // Load wishlist from localStorage on component mount
   useEffect(() => {
@@ -22,33 +23,33 @@ const HomepageCard = ({ product }) => {
     setWishlist(wishlistFromStorage);
   }, []);
 
-  const handleAddtoCart = async (productId) => {
+
+
+
+    const handleAddtoCart = async (productId) => {
     const pid = typeof productId === 'string' ? productId : String(productId || '');
     const cart = JSON.parse(localStorage.getItem("addtocart")) || {};
+
+
     if (cart[pid]) {
       toast.info("Already product add to cart");
       return;
     }
-    const payload = removeNulls({
-      email: userData?.email,
-      productId: pid,
-    });
+   
     try {
       // Always update localStorage
-      cart[pid] = 1;
+      cart[pid] = { quantity: 1, size: "250 ml" };
       localStorage.setItem("addtocart", JSON.stringify(cart));
-      // If userData available, sync with backend
-      if (userData && userData.email) {
-        const response = await api.put("/add-to-cart", payload);
-        toast.success(response.data.message || "Added to cart");
-      } else {
-        toast.success("Added to cart (local only)");
-      }
+      toast.success("Added to cart");
+      
     } catch (error) {
       console.error("Error adding to cart:", error);
       toast.error(error.response?.data?.message || "Failed to add to cart");
     }
   };
+
+
+
 
   const handleAddToWishlist = async (productId) => {
     const storedWishlist = JSON.parse(localStorage.getItem("wishlist")) || {};
@@ -56,35 +57,33 @@ const HomepageCard = ({ product }) => {
     try {
       let updatedWishlist;
       if (isInWishlist) {
-        // Remove from wishlist (local)
+        // Remove from wishlist (local storage only)
         updatedWishlist = { ...storedWishlist };
         delete updatedWishlist[productId];
         localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
         setWishlist(updatedWishlist);
-        // If userData available, sync with backend
-        if (userData && userData.email) {
-          const payload = removeNulls({ email: userData.email, productId });
-          await api.put("/remove-from-wishlist", payload);
-        }
+
+
+       
         toast.success("Removed from wishlist");
       } else {
-        // Add to wishlist (local)
+        // Add to wishlist (local storage only)
         updatedWishlist = { ...storedWishlist, [productId]: true };
         localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
         setWishlist(updatedWishlist);
-        // If userData available, sync with backend
-        if (userData && userData.email) {
-          const payload = removeNulls({ email: userData.email, productId });
-          await api.put("/add-to-wishlist", payload);
-        }
+       
         toast.success("Added to wishlist");
       }
     } catch (error) {
       console.error("Wishlist error:", error);
-      toast.error(error.response?.data?.message || "Operation failed");
+      toast.error("Failed to update wishlist");
     }
   };
 
+
+
+
+  
   const handleViewDetails = (productId) => {
     navigate(`/product-details/${productId}`);
   };
@@ -102,11 +101,15 @@ const HomepageCard = ({ product }) => {
   if (!product) return null;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden flex flex-col h-full">
-      {/* Image with hover effects */}
-      <div className="relative group aspect-square">
+   <div 
+      className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col h-full border border-gray-100 hover:border-gray-200 "
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Image container with hover effects */}
+      <div className="relative aspect-square overflow-hidden">
         <img
-          className="w-full h-full object-cover"
+          className={`w-full h-full object-cover transition-transform duration-500 ${isHovered ? 'scale-105' : ''}`}
           src={product?.image}
           alt={product?.name}
           loading="lazy"
@@ -114,55 +117,68 @@ const HomepageCard = ({ product }) => {
         
         {/* Wishlist button */}
         <button
-          onClick={() => handleAddToWishlist(product?._id)}
-          className="absolute top-2 right-2 p-1.5 bg-white/80 rounded-full shadow hover:bg-white transition-all"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleAddToWishlist(product?._id);
+          }}
+          className={`absolute top-3 right-3 p-1.5 rounded-full backdrop-blur-sm transition-all ${
+            wishlist[product._id] 
+              ? 'bg-red-100 text-red-500' 
+              : 'bg-white/80 text-gray-600 hover:bg-white'
+          }`}
           aria-label={wishlist[product._id] ? "Remove from wishlist" : "Add to wishlist"}
         >
           {wishlist[product._id] ? (
-            <HeartIconSolid className="h-5 w-5 text-red-500 " />
+            <HeartIconSolid className="h-5 w-5" />
           ) : (
-            <HeartIcon className="h-5 w-5 text-gray-600 hover:text-red-500" />
+            <HeartIcon className="h-5 w-5 hover:text-red-500" />
           )}
         </button>
         
-        {/* Quick view overlay */}
-        {/* <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
-          <button
-            onClick={() => handleViewDetails(product?._id)}
-            className="bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors"
-            title="View Details"
-          >
-            <EyeIcon className="h-5 w-5 text-gray-700" />
-          </button>
-        </div> */}
-
+        {/* Quick view button */}
+        <button
+          onClick={() => handleViewDetails(product?._id)}
+          className={`absolute bottom-3 left-1/2 transform -translate-x-1/2 bg-white px-4 py-2 rounded-full shadow-md transition-all ${
+            isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+          } flex items-center gap-1 text-sm font-medium`}
+        >
+          <EyeIcon className="h-4 w-4" />
+          Quick View
+        </button>
       </div>
 
       {/* Product info */}
-      <div className="p-3 flex flex-col flex-grow">
-        <h3 className="font-medium text-gray-900 text-sm line-clamp-1 mb-1">
+      <div className="p-4 flex flex-col flex-grow">
+        <h3 className="font-semibold text-gray-900 text-sm line-clamp-2 mb-2 min-h-[2.5rem]">
           {product?.name}
         </h3>
-        <p className="text-gray-500 text-xs line-clamp-2 mb-3">
+        <p className="text-gray-500 text-xs line-clamp-2 mb-3 min-h-[2.5rem]">
           {product?.shortDescription}
         </p>
         
         {/* Price and actions */}
         <div className="mt-auto">
-          <span className="font-bold text-sm block mb-3">
-            {product.price} BDT
-          </span>
+          <div className="flex items-center justify-between mb-3">
+            <span className="font-bold text-base text-gray-800">
+              {product.price} BDT
+            </span>
+            {product.originalPrice && (
+              <span className="text-xs text-gray-400 line-through">
+                {product.originalPrice} BDT
+              </span>
+            )}
+          </div>
           
           <div className="flex gap-2">
             <button
               onClick={() => handleViewDetails(product?._id)}
-              className="flex-1 text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+              className="flex-1 text-xs px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors font-medium"
             >
               Details
             </button>
             <button
               onClick={() => handleAddtoCart(product?._id)}
-              className="flex-1 text-xs px-3 py-1.5 bg-[#167389] text-white hover:bg-[#135a6e] rounded-md transition-colors"
+              className="flex-1 text-xs px-3 py-2 bg-[#22874b] text-white hover:bg-[#135a6e] rounded-lg transition-colors font-medium shadow-sm"
             >
               Add to Cart
             </button>

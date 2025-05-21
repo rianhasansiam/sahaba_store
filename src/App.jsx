@@ -6,6 +6,7 @@ import { ToastContainer } from 'react-toastify';
 import { useContext } from "react";
 import { contextData } from "./Contex";
 import LoadingPage from "./Conponents/LoadingPage";
+import FooterNavigation from "./Conponents/FooterNavigation";
 
 
 
@@ -22,6 +23,7 @@ if(loading) return <LoadingPage></LoadingPage>
    <Outlet></Outlet>
 
    </div>
+   <FooterNavigation></FooterNavigation>
    <Footer></Footer>
    <ToastContainer />
     </>

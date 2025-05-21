@@ -172,7 +172,7 @@ const AllCategories = () => {
             setEditMode(false);
             setCategoryForm({ name: '', availableAmount: '', image: '' });
           }}
-          className="px-4 py-2 bg-[#167389] text-white rounded-md hover:bg-[#347e8f]"
+          className="px-4 py-2 bg-[#22874b] text-white rounded-md hover:bg-[#347e8f]"
         >
           Add Category
         </button>
@@ -182,7 +182,7 @@ const AllCategories = () => {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-40">
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-40 ">
           <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-lg">
             <h2 className="text-xl font-bold mb-4">
               {editMode ? 'Edit Category' : 'Add New Category'}
@@ -278,7 +278,7 @@ const AllCategories = () => {
       )}
 
       {/* Table Section */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-lg shadow overflow-scroll">
         {isLoading ? (
           <LoadingPage></LoadingPage>
         ) : isError ? (

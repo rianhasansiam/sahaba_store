@@ -129,11 +129,11 @@ const Login = () => {
               </div>
             </div>
 
-            {/* <Link to="#" className="text-right block hover:text-[#167389] hover:font-semibold underline">
+            {/* <Link to="#" className="text-right block hover:text-[#22874b] hover:font-semibold underline">
               Forgot your password?
             </Link> */}
 
-            <button type="submit" className="login__button bg-[#167389] text-white py-2 w-full rounded mt-4">
+            <button type="submit" className="login__button bg-[#22874b] text-white py-2 w-full rounded mt-4">
               {isLoading ? 'Logging in...' : 'Login'}
             </button>
           </form>
@@ -160,7 +160,7 @@ const Login = () => {
           {/* Register Link */}
           <p className="text-right mt-4">
             Don't have an account?
-            <Link to="/register" className="underline hover:text-[#167389] hover:font-semibold ml-1">
+            <Link to="/register" className="underline hover:text-[#22874b] hover:font-semibold ml-1">
               Create Account
             </Link>
           </p>

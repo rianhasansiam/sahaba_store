@@ -102,7 +102,7 @@ const OrderConfirmation = () => {
           {/* Order Summary Card */}
           <div className="bg-white p-6 rounded-lg shadow-md lg:col-span-2">
             <h2 className="text-xl font-semibold mb-4 flex items-center">
-              <FaBox className="mr-2 text-[#167389]" /> Order Summary
+              <FaBox className="mr-2 text-[#22874b]" /> Order Summary
             </h2>
             
             <div className="mb-6">
@@ -145,6 +145,7 @@ const OrderConfirmation = () => {
                       <div className="flex-1">
                         <h4 className="font-medium text-gray-900">{product.name || 'Product'}</h4>
                         <p className="text-sm text-gray-500">Product ID: {product.productId || '--'}</p>
+                          <p className='border rounded-full border-[#22874b] w-20 text-center my-2 bg-green-100'>{product.size}</p>
                         <div className="flex justify-between mt-1">
                           <p className="text-sm">৳{(product.price || 0).toFixed(2)} × {product.quantity || 1}</p>
                           <p className="font-medium">৳{((product.price || 0) * (product.quantity || 1)).toFixed(2)}</p>
@@ -177,7 +178,7 @@ const OrderConfirmation = () => {
             {/* Customer Info */}
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-xl font-semibold mb-4 flex items-center">
-                <FaHome className="mr-2 text-[#167389]" /> Customer Information
+                <FaHome className="mr-2 text-[#22874b]" /> Customer Information
               </h2>
               <div className="space-y-3">
                 <div>
@@ -198,7 +199,7 @@ const OrderConfirmation = () => {
             {/* Shipping Info */}
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-xl font-semibold mb-4 flex items-center">
-                <FaShippingFast className="mr-2 text-[#167389]" /> Shipping Address
+                <FaShippingFast className="mr-2 text-[#22874b]" /> Shipping Address
               </h2>
               <div className="space-y-3">
                 <div>
@@ -225,7 +226,7 @@ const OrderConfirmation = () => {
             {/* Payment Info */}
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-xl font-semibold mb-4 flex items-center">
-                <FaMoneyBillWave className="mr-2 text-[#167389]" /> Payment Method
+                <FaMoneyBillWave className="mr-2 text-[#22874b]" /> Payment Method
               </h2>
               <div className="space-y-3">
                 <div>
@@ -258,11 +259,11 @@ const OrderConfirmation = () => {
             {/* Timeline Steps */}
             <div className="relative pl-10 pb-6">
               <div className="flex items-start mb-1">
-                <div className={`absolute -left-4 top-0 w-8 h-8 rounded-full flex items-center justify-center ${order.status === 'processing' ? 'bg-[#167389] text-white' : 'bg-gray-200'}`}>
+                <div className={`absolute -left-4 top-0 w-8 h-8 rounded-full flex items-center justify-center ${order.status === 'processing' ? 'bg-[#22874b] text-white' : 'bg-gray-200'}`}>
                   1
                 </div>
                 <div className="ml-4">
-                  <h3 className={`font-medium ${order.status === 'processing' ? 'text-[#167389]' : 'text-gray-500'}`}>Order Processing</h3>
+                  <h3 className={`font-medium ${order.status === 'processing' ? 'text-[#22874b]' : 'text-gray-500'}`}>Order Processing</h3>
                   <p className="text-sm text-gray-500">We've received your order</p>
                 </div>
               </div>
@@ -270,11 +271,11 @@ const OrderConfirmation = () => {
 
             <div className="relative pl-10 pb-6">
               <div className="flex items-start mb-1">
-                <div className={`absolute -left-4 top-0 w-8 h-8 rounded-full flex items-center justify-center ${order.status === 'shipped' ? 'bg-[#167389] text-white' : 'bg-gray-200'}`}>
+                <div className={`absolute -left-4 top-0 w-8 h-8 rounded-full flex items-center justify-center ${order.status === 'shipped' ? 'bg-[#22874b] text-white' : 'bg-gray-200'}`}>
                   2
                 </div>
                 <div className="ml-4">
-                  <h3 className={`font-medium ${order.status === 'shipped' ? 'text-[#167389]' : 'text-gray-500'}`}>Shipped</h3>
+                  <h3 className={`font-medium ${order.status === 'shipped' ? 'text-[#22874b]' : 'text-gray-500'}`}>Shipped</h3>
                   <p className="text-sm text-gray-500">Your order is on the way</p>
                 </div>
               </div>
@@ -282,11 +283,11 @@ const OrderConfirmation = () => {
 
             <div className="relative pl-10">
               <div className="flex items-start">
-                <div className={`absolute -left-4 top-0 w-8 h-8 rounded-full flex items-center justify-center ${order.status === 'delivered' ? 'bg-[#167389] text-white' : 'bg-gray-200'}`}>
+                <div className={`absolute -left-4 top-0 w-8 h-8 rounded-full flex items-center justify-center ${order.status === 'delivered' ? 'bg-[#22874b] text-white' : 'bg-gray-200'}`}>
                   3
                 </div>
                 <div className="ml-4">
-                  <h3 className={`font-medium ${order.status === 'delivered' ? 'text-[#167389]' : 'text-gray-500'}`}>Delivered</h3>
+                  <h3 className={`font-medium ${order.status === 'delivered' ? 'text-[#22874b]' : 'text-gray-500'}`}>Delivered</h3>
                   <p className="text-sm text-gray-500">Your order has arrived</p>
                 </div>
               </div>
@@ -298,12 +299,12 @@ const OrderConfirmation = () => {
         <div className="text-center">
           <Link
             to="/"
-            className="inline-block px-6 py-3 bg-[#167389] text-white rounded-md font-medium hover:bg-[#135a6e] transition-colors"
+            className="inline-block px-6 py-3 bg-[#22874b] text-white rounded-md font-medium hover:bg-[#135a6e] transition-colors"
           >
             Continue Shopping
           </Link>
           <p className="mt-4 text-sm text-gray-600">
-            Need help? <Link to="/contact" className="text-[#167389] hover:underline">Contact us</Link>
+            Need help? <Link to="/contact" className="text-[#22874b] hover:underline">Contact us</Link>
           </p>
         </div>
       </div>

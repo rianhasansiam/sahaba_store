@@ -37,7 +37,7 @@ const Adminpage = () => {
 
       {/* Sidebar */}
       <aside
-        className={`bg-[#167389] text-white w-64 h-full fixed top-0 left-0 z-50 transform ${
+        className={`bg-[#22874b] text-white w-64 h-full fixed top-0 left-0 z-50 transform ${
           isMenuOpen ? 'translate-x-0' : '-translate-x-full'
         } md:translate-x-0 md:relative transition-transform duration-300 ease-in-out shadow-lg`}
       >
@@ -68,7 +68,7 @@ const Adminpage = () => {
                 className={({ isActive }) =>
                   `block py-3 px-4 rounded-lg transition-colors ${
                     isActive
-                      ? 'bg-white text-[#167389] font-bold'
+                      ? 'bg-white text-[#22874b] font-bold'
                       : 'hover:bg-white/10 text-white'
                   }`
                 }
@@ -82,7 +82,7 @@ const Adminpage = () => {
                 className={({ isActive }) =>
                   `block py-3 px-4 rounded-lg transition-colors ${
                     isActive
-                      ? 'bg-white text-[#167389] font-bold'
+                      ? 'bg-white text-[#22874b] font-bold'
                       : 'hover:bg-white/10 text-white'
                   }`
                 }
@@ -96,7 +96,7 @@ const Adminpage = () => {
                 className={({ isActive }) =>
                   `block py-3 px-4 rounded-lg transition-colors ${
                     isActive
-                      ? 'bg-white text-[#167389] font-bold'
+                      ? 'bg-white text-[#22874b] font-bold'
                       : 'hover:bg-white/10 text-white'
                   }`
                 }
@@ -110,7 +110,7 @@ const Adminpage = () => {
                 className={({ isActive }) =>
                   `block py-3 px-4 rounded-lg transition-colors ${
                     isActive
-                      ? 'bg-white text-[#167389] font-bold'
+                      ? 'bg-white text-[#22874b] font-bold'
                       : 'hover:bg-white/10 text-white'
                   }`
                 }
@@ -124,7 +124,7 @@ const Adminpage = () => {
                 className={({ isActive }) =>
                   `block py-3 px-4 rounded-lg transition-colors ${
                     isActive
-                      ? 'bg-white text-[#167389] font-bold'
+                      ? 'bg-white text-[#22874b] font-bold'
                       : 'hover:bg-white/10 text-white'
                   }`
                 }
@@ -138,7 +138,7 @@ const Adminpage = () => {
                 className={({ isActive }) =>
                   `block py-3 px-4 rounded-lg transition-colors ${
                     isActive
-                      ? 'bg-white text-[#167389] font-bold'
+                      ? 'bg-white text-[#22874b] font-bold'
                       : 'hover:bg-white/10 text-white'
                   }`
                 }
@@ -168,7 +168,7 @@ const Adminpage = () => {
           </h1>
           <button
             onClick={toggleMenu}
-            className="text-2xl text-[#167389] focus:outline-none"
+            className="text-2xl text-[#22874b] focus:outline-none"
             aria-label="Open menu"
           >
             ☰

@@ -257,7 +257,7 @@ const Register = () => {
 
           <p className="text-right">
             Already have an account?
-            <Link to="/login" className="underline hover:text-[#167389] hover:font-semibold ml-1">
+            <Link to="/login" className="underline hover:text-[#22874b] hover:font-semibold ml-1">
               Login
             </Link>
           </p>
@@ -282,7 +282,7 @@ const Register = () => {
             />
             <label className="register__label absolute left-10 top-20 !font-semibold">Phone</label>
             <div className="modal-action mt-4">
-              <button type="submit" className="btn bg-[#167389] text-white w-20">
+              <button type="submit" className="btn bg-[#22874b] text-white w-20">
                 OK
               </button>
             </div>

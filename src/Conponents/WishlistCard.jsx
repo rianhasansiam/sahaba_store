@@ -1,15 +1,20 @@
 import React from 'react';
 import WishlishtEachcard from './WishlishtEachcard';
 
-const Wishlist = ({ eachuser, setReload, reload }) => {
-  const productId = eachuser.addToWishlist;
+const WishlistCard = ({ products, items, setReload, reload }) => {
   return (
-    <div>
-      {productId?.map((id, index) => (
-        <WishlishtEachcard key={index} id={id} setreload={setReload} reload={reload}></WishlishtEachcard>
+    <div className="divide-y divide-gray-200">
+      {products.map((product, index) => (
+        <WishlishtEachcard 
+          key={index}
+          product={product}
+          id={items[index]} 
+          setreload={setReload} 
+          reload={reload}
+        />
       ))}
     </div>
   );
 };
 
-export default Wishlist;
+export default WishlistCard;

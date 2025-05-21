@@ -130,6 +130,20 @@ setLogoutLoading(true)
       });
     };
     
+    const CART_STORAGE_KEY = "addtocart";
+  
+  // Function to clear cart
+  const clearCart = () => {
+    try {
+      localStorage.removeItem(CART_STORAGE_KEY);
+      // Trigger storage event for components listening to localStorage changes
+      window.dispatchEvent(new Event('storage'));
+      return true;
+    } catch (error) {
+      console.error("Error clearing cart:", error);
+      return false;
+    }
+  };
 
   // Data to be shared via context
   const info = {
@@ -147,6 +161,7 @@ setLogoutLoading(true)
     customerOrder,
     searchTerm,
     setSearchTerm,
+    clearCart, // <-- Add clearCart to the context
   };
 
   return (

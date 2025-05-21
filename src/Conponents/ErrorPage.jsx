@@ -26,14 +26,14 @@ const ErrorPage = () => {
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
           <Link 
             to="/" 
-            className="flex items-center justify-center px-6 py-3 bg-[#167389] hover:bg-[#4190a1] text-white rounded-lg transition-colors shadow-md"
+            className="flex items-center justify-center px-6 py-3 bg-[#22874b] hover:bg-[#4190a1] text-white rounded-lg transition-colors shadow-md"
           >
             <FaHome className="mr-2" />
             Return Home
           </Link>
           <Link 
             to="/contact" 
-            className="flex items-center justify-center px-6 py-3 border border-[#167389] text-[#167389] hover:bg-blue-50 rounded-lg transition-colors"
+            className="flex items-center justify-center px-6 py-3 border border-[#22874b] text-[#22874b] hover:bg-blue-50 rounded-lg transition-colors"
           >
             <FaEnvelope className="mr-2" />
             Contact Support
@@ -47,7 +47,7 @@ const ErrorPage = () => {
             placeholder="Search our site..."
             className="w-full pl-4 pr-12 py-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
           />
-          <button className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#167389] text-white p-2 rounded-full hover:bg-[#167389] transition-colors">
+          <button className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#22874b] text-white p-2 rounded-full hover:bg-[#22874b] transition-colors">
             <FaSearch />
           </button>
         </div>

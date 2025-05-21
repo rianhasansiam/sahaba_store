@@ -227,7 +227,7 @@ const AllProducts = () => {
         <h1 className="text-2xl font-bold">Product Management</h1>
         <button
           onClick={() => setShowModal(true)}
-          className="px-4 py-2 bg-[#167389] text-white rounded-md hover:bg-[#519fb1] transition-colors"
+          className="px-4 py-2 bg-[#22874b] text-white rounded-md hover:bg-[#519fb1] transition-colors"
           disabled={isCategoriesLoading}
         >
           Add New Product
@@ -524,7 +524,7 @@ const AllProducts = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 space-x-2">
                       <button
                         onClick={() => handleEdit(product)}
-                        className="text-[#167389] hover:text-[#5da5b6]"
+                        className="text-[#22874b] hover:text-[#5da5b6]"
                       >
                         Edit
                       </button>

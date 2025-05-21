@@ -16,6 +16,7 @@ const ProductCard = ({ products, categoryName, categoryID }) => {
   const location = useLocation();
   const { userData } = useContext(contextData);
   const [wishlist, setWishlist] = useState({});
+  const [hoveredIndex, setHoveredIndex] = useState(null);
 
   useEffect(() => {
     const wishlistFromStorage = JSON.parse(localStorage.getItem("wishlist")) || {};
@@ -25,55 +26,57 @@ const ProductCard = ({ products, categoryName, categoryID }) => {
   const handleAddtoCart = async (productId) => {
     const pid = typeof productId === 'string' ? productId : String(productId || '');
     const cart = JSON.parse(localStorage.getItem("addtocart")) || {};
+
     if (cart[pid]) {
       toast.info("Already product add to cart");
       return;
     }
-    const payload = removeNulls({
-      email: userData?.email,
-      productId: pid,
-    });
+   
     try {
       // Always update localStorage
-      cart[pid] = 1;
+      cart[pid] = { quantity: 1, size: "250 ml" };
       localStorage.setItem("addtocart", JSON.stringify(cart));
-      // If userData available, sync with backend
-      if (userData && userData.email) {
-        const response = await api.put("/add-to-cart", payload);
-        toast.success(response.data.message || "Added to cart");
-      } else {
-        toast.success("Added to cart (local only)");
-      }
+      toast.success("Added to cart");
+      
     } catch (error) {
       console.error("Error adding to cart:", error);
-      toast.error(error.response?.data?.message || "Failed to add to cart");
+      toast.error("Failed to add to cart");
     }
   };
+ 
+ 
+ 
+ 
+   const handleAddToWishlist = async (productId) => {
+     const storedWishlist = JSON.parse(localStorage.getItem("wishlist")) || {};
+     const isInWishlist = storedWishlist[productId];
+     try {
+       let updatedWishlist;
+       if (isInWishlist) {
+         // Remove from wishlist (local storage only)
+         updatedWishlist = { ...storedWishlist };
+         delete updatedWishlist[productId];
+         localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
+         setWishlist(updatedWishlist);
+ 
+ 
+        
+         toast.success("Removed from wishlist");
+       } else {
+         // Add to wishlist (local storage only)
+         updatedWishlist = { ...storedWishlist, [productId]: true };
+         localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
+         setWishlist(updatedWishlist);
+        
+         toast.success("Added to wishlist");
+       }
+     } catch (error) {
+       console.error("Wishlist error:", error);
+       toast.error("Failed to update wishlist");
+     }
+   };
 
-  const handleAddToWishlist = async (productId) => {
-    const storedWishlist = JSON.parse(localStorage.getItem("wishlist")) || {};
-    const isInWishlist = storedWishlist[productId];
-    if (isInWishlist) {
-      toast.info("Already product add to wishlist");
-      return;
-    }
-    try {
-      let updatedWishlist;
-      // Add to wishlist (local)
-      updatedWishlist = { ...storedWishlist, [productId]: true };
-      localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
-      setWishlist(updatedWishlist);
-      // If userData available, sync with backend
-      if (userData && userData.email) {
-        const payload = removeNulls({ email: userData.email, productId });
-        await api.put("/add-to-wishlist", payload);
-      }
-      toast.success("Added to wishlist");
-    } catch (error) {
-      console.error("Wishlist error:", error);
-      toast.error(error.response?.data?.message || "Operation failed");
-    }
-  };
+
 
   const handleViewDetails = (productId) => {
     navigate(`/product-details/${productId}`);
@@ -82,84 +85,106 @@ const ProductCard = ({ products, categoryName, categoryID }) => {
   if (!products || products.length === 0) return null;
 
   return (
-    <div className="my-4 mx-4 sm:mx-6 lg:mx-8 xl:mx-auto max-w-7xl shadow-lg p-4 sm:p-6 rounded-xl bg-white ">
-      <div className="flex  sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
-        <h1 className="text-lg sm:text-xl font-semibold text-gray-800">{categoryName}</h1>
+   <div className="my-6 mx-2 sm:mx-6 lg:mx-8 xl:mx-auto max-w-7xl ">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-800">{categoryName}</h1>
         {location.pathname === '/' && (
           <button 
             onClick={() => navigate(`/allproduct/${categoryID}`)} 
-            className="px-3 sm:px-4 py-1 sm:py-2 bg-[#167389] text-white rounded-md hover:bg-[#347e8f] text-sm sm:text-base"
+            className="px-4 py-2 bg-[#22874b] text-white rounded-lg hover:bg-[#347e8f] transition-colors duration-200 text-sm sm:text-base shadow-sm hover:shadow-md"
           >
-            View More
+            View All Products
           </button>
         )}
       </div>
 
-      <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5">
-        {products.map((item) => (
-          <div
-            key={item?._id}
-            className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden flex flex-col"
-          >
-            <div className="relative group aspect-square">
-              <img
-                className="w-full h-full object-cover"
-                src={item?.image}
-                alt={item?.name}
-                loading="lazy"
-              />
-              
-              {/* Wishlist button */}
-              <button
-                onClick={() => handleAddToWishlist(item?._id)}
-                className="absolute top-2 right-2 text-gray-400 hover:text-red-500 z-10"
-                aria-label={wishlist[item._id] ? "Remove from wishlist" : "Add to wishlist"}
-              >
-                {wishlist[item._id] ? (
-                  <HeartIconSolid className="h-5 w-5 sm:h-6 sm:w-6 text-red-500" />
-                ) : (
-                  <HeartIcon className="h-5 w-5 sm:h-6 sm:w-6" />
-                )}
-              </button>
-              
-              {/* Quick view button overlay */}
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
-                <button
-                  onClick={() => handleViewDetails(item?._id)}
-                  className="bg-white rounded-full p-1.5 sm:p-2 shadow-lg hover:bg-gray-100 transition-colors"
-                  title="View Details"
-                  aria-label="View product details"
-                >
-                  <EyeIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-700" />
-                </button>
-              </div>
-            </div>
+      <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5">
+        {products.map((item, idx) => (
+          <div key={item?._id}
+      className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col h-full border border-gray-100 hover:border-gray-200"
+      onMouseEnter={() => setHoveredIndex(idx)}
+      onMouseLeave={() => setHoveredIndex(null)}
+    >
+      {/* Image container with hover effects */}
+      <div className="relative aspect-square overflow-hidden">
+        <img
+          className={`w-full h-full object-cover transition-transform duration-500 ${hoveredIndex === idx ? 'scale-105' : ''}`}
+          src={item?.image}
+          alt={item?.name}
+          loading="lazy"
+        />
+        
+        {/* Wishlist button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleAddToWishlist(item?._id);
+          }}
+          className={`absolute top-3 right-3 p-1.5 rounded-full backdrop-blur-sm transition-all ${
+            wishlist[item._id] 
+              ? 'bg-red-100 text-red-500' 
+              : 'bg-white/80 text-gray-600 hover:bg-white'
+          }`}
+          aria-label={wishlist[item._id] ? "Remove from wishlist" : "Add to wishlist"}
+        >
+          {wishlist[item._id] ? (
+            <HeartIconSolid className="h-5 w-5" />
+          ) : (
+            <HeartIcon className="h-5 w-5 hover:text-red-500" />
+          )}
+        </button>
+        
+        {/* Quick view button */}
+        <button
+          onClick={() => handleViewDetails(item?._id)}
+          className={`absolute bottom-3 left-1/2 transform -translate-x-1/2 bg-white px-4 py-2 rounded-full shadow-md transition-all ${
+            hoveredIndex === idx ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+          } flex items-center gap-1 text-sm font-medium`}
+        >
+          <EyeIcon className="h-4 w-4" />
+          Quick View
+        </button>
+      </div>
 
-            <div className="p-2 sm:p-3 flex-grow flex flex-col">
-              <h3 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-1 mb-1">{item?.name}</h3>
-              <p className="text-gray-500 text-xs sm:text-sm line-clamp-2 mb-2 sm:mb-3">{item?.shortDescription}</p>
-              <div className="mt-auto flex flex-col  justify-between items-center">
-
-                <span className="font-bold text-sm sm:text-base">{item.price} BDT</span>
-
-                <div className="flex gap-2 my-3  sm:gap-2 ">
-                  <button
-                    onClick={() => handleViewDetails(item?._id)}
-                    className="text-xs sm:text-sm px-2 sm:px-3 py-0.5 sm:py-1 bg-gray-100 hover:bg-gray-200 rounded-md whitespace-nowrap"
-                  >
-                    Details
-                  </button>
-                  <button
-                    onClick={() => handleAddtoCart(item?._id)}
-                    className="text-xs sm:text-sm px-2 sm:px-3 py-0.5 sm:py-1 bg-[#167389] text-white hover:bg-[#135a6e] rounded-md whitespace-nowrap"
-                  >
-                    Add to Cart
-                  </button>
-                </div>
-
-              </div>
-            </div>
+      {/* Product info */}
+      <div className="p-4 flex flex-col flex-grow">
+        <h3 className="font-semibold text-gray-900 text-sm line-clamp-2 mb-2 min-h-[2.5rem]">
+          {item?.name}
+        </h3>
+        <p className="text-gray-500 text-xs line-clamp-2 mb-3 min-h-[2.5rem]">
+          {item?.shortDescription}
+        </p>
+        
+        {/* Price and actions */}
+        <div className="mt-auto">
+          <div className="flex items-center justify-between mb-3">
+            <span className="font-bold text-base text-gray-800">
+              {item.price} BDT
+            </span>
+            {item.originalPrice && (
+              <span className="text-xs text-gray-400 line-through">
+                {item.originalPrice} BDT
+              </span>
+            )}
           </div>
+          
+          <div className="flex gap-2">
+            <button
+              onClick={() => handleViewDetails(item?._id)}
+              className="flex-1 text-xs px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors font-medium"
+            >
+              Details
+            </button>
+            <button
+              onClick={() => handleAddtoCart(item?._id)}
+              className="flex-1 text-xs px-3 py-2 bg-[#22874b] text-white hover:bg-[#135a6e] rounded-lg transition-colors font-medium shadow-sm"
+            >
+              Add to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
         ))}
       </div>
     </div>
