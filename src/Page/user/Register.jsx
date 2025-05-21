@@ -148,14 +148,14 @@ const Register = () => {
   return (
     <div className="login container mx-auto flex flex-col lg:flex-row justify-center gap-20 my-10">
       {/* Image */}
-      <div className="lg:w-[35%] w-[90vw] max-sm:mx-auto  rounded-xl  lg:rounded-l-3xl overflow-hidden">
+      <div className="lg:w-[100%] w-[90vw] max-sm:mx-auto  rounded-xl  lg:rounded-l-3xl overflow-hidden">
         <img className="h-full w-full" src={bgImg} alt="Register background" />
       </div>
 
       {/* Form */}
       <div className="login__access w-[90vw] max-sm:mx-auto !lg:w-[40%]">
         <h1 className="text-2xl my-6 text-center font-semibold">Create your account.</h1>
-        <div className="login__area">
+        <div className="login__area ">
           <form className="login__form" onSubmit={handleRegister}>
             <div className="login__content">
               <div className="flex justify-between">

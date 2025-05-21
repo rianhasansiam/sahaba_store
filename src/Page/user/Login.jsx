@@ -93,7 +93,7 @@ const Login = () => {
       <div className="login__access w-[90vw] !lg:w-[40%] max-sm:mx-auto">
         <h1 className="text-2xl my-4 text-center font-semibold">Log in to your account.</h1>
 
-        <div className="login__area">
+        <div className="login__area lg:w-[100%]">
           <form className="login__form" onSubmit={handleSubmit}>
             <div className="login__content">
               {/* Email Field */}
@@ -168,7 +168,7 @@ const Login = () => {
       </div>
 
       {/* LOGIN IMAGE */}
-      <div className="lg:w-[35%] w-[90vw] max-sm:mx-auto rounded-xl  lg:rounded-r-3xl overflow-hidden">
+      <div className="lg:w-[100%] w-[90vw] max-sm:mx-auto rounded-xl  lg:rounded-r-3xl overflow-hidden">
         <img className="h-full w-full" src={bgImg} alt="Login Background" />
       </div>
     </div>
