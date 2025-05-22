@@ -76,6 +76,8 @@ const Register = () => {
             Swal.fire({ icon: 'error', title: 'Post Error', text: error.message });
           },
         });
+
+        
       }
     } catch (error) {
       Swal.fire({ icon: 'error', title: 'Auth Error', text: error.message });

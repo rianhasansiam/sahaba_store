@@ -6,10 +6,11 @@ import { onAuthStateChanged, signInWithEmailAndPassword, GoogleAuthProvider, sig
 import auth from './Firebase';
 import Swal from 'sweetalert2';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { usePostData } from '../../hooks/usePostData';
 
 const Login = () => {
   const { googleLogReg, redirectPath } = useContext(contextData); // ✅ use only from context
-
+  const { mutate } = usePostData('/userData');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -53,19 +54,31 @@ const Login = () => {
       const user = result.user;
 
       // ✅ FIXED: removed undefined phone
-      const userData = {
+      
+              const userData = {
         email: user.email,
-        displayName: user.displayName,
+        phone: user.phone || '',
+        displayName: user.displayName || '',
         uid: user.uid,
       };
+      
+              mutate(userData, {
+                onSuccess: () => {
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Registration Successful',
+                    showConfirmButton: false,
+                    timer: 1500,
+                  });
+                  navigate('/');
+                },
+                onError: (error) => {
+                  Swal.fire({ icon: 'error', title: 'Post Error', text: error.message });
+                },
+              });
 
-      // You can handle saving userData here if needed
-      Swal.fire({
-        icon: 'success',
-        title: 'Login Successful',
-        showConfirmButton: false,
-        timer: 1500,
-      });
+
+
       navigate('/');
     } catch (error) {
       console.error('Google sign-in error:', error);
