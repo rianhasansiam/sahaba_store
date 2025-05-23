@@ -24,12 +24,9 @@ const HomepageCard = ({ product }) => {
   }, []);
 
 
-
-
     const handleAddtoCart = async (productId) => {
     const pid = typeof productId === 'string' ? productId : String(productId || '');
     const cart = JSON.parse(localStorage.getItem("addtocart")) || {};
-
 
     if (cart[pid]) {
       toast.info("Already product add to cart");
@@ -37,8 +34,27 @@ const HomepageCard = ({ product }) => {
     }
    
     try {
-      // Always update localStorage
-      cart[pid] = { quantity: 1, size: "250 ml" };
+      // Get default price variant (250ml) or use base price
+      let variantPrice = product.price;
+      let variantSize = "250ml";
+      
+      if (product.priceVariants && product.priceVariants.length > 0) {
+        // Find the 250ml variant or use the first one
+        const defaultVariant = product.priceVariants.find(v => v.quantity === "250ml") || product.priceVariants[0];
+        variantPrice = defaultVariant.price;
+        variantSize = defaultVariant.quantity;
+      }
+      
+      // Create cart item with full product details
+      cart[pid] = {
+        name: product.name,
+        price: variantPrice,
+        productId: product.productId || pid,
+        quantity: 1,
+        thumbnail: product.thumbnail || product.image,
+        variant: variantSize
+      };
+      
       localStorage.setItem("addtocart", JSON.stringify(cart));
       toast.success("Added to cart");
       
@@ -110,7 +126,7 @@ const HomepageCard = ({ product }) => {
       <div className="relative aspect-square overflow-hidden">
         <img
           className={`w-full h-full object-cover transition-transform duration-500 ${isHovered ? 'scale-105' : ''}`}
-          src={product?.image}
+          src={product?.thumbnail}
           alt={product?.name}
           loading="lazy"
         />
@@ -149,18 +165,19 @@ const HomepageCard = ({ product }) => {
 
       {/* Product info */}
       <div className="p-4 flex flex-col flex-grow">
-        <h3 className="font-semibold text-gray-900 text-sm line-clamp-2 mb-2 min-h-[2.5rem]">
+        <h3 className="font-semibold text-gray-900 text-sm line-clamp-2 mb-2 ">
           {product?.name}
         </h3>
-        <p className="text-gray-500 text-xs line-clamp-2 mb-3 min-h-[2.5rem]">
+        <p className="text-gray-500 text-xs line-clamp-2 mb-3 ">
           {product?.shortDescription}
         </p>
         
-        {/* Price and actions */}
-        <div className="mt-auto">
-          <div className="flex items-center justify-between mb-3">
+        {/* Price and actions */}        <div className="mt-auto">
+          <div className="flex items-center justify-between mb-2">
             <span className="font-bold text-base text-gray-800">
-              {product.price} BDT
+              {product.priceVariants && product.priceVariants.length > 0 
+                ? `${product.priceVariants[0].price} BDT` 
+                : `${product.price} BDT`}
             </span>
             {product.originalPrice && (
               <span className="text-xs text-gray-400 line-through">

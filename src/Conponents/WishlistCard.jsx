@@ -1,20 +1,27 @@
 import React from 'react';
 import WishlishtEachcard from './WishlishtEachcard';
+import PropTypes from 'prop-types';
 
-const WishlistCard = ({ products, items, setReload, reload }) => {
+const WishlistCard = ({ products, setReload, reload }) => {
   return (
     <div className="divide-y divide-gray-200">
-      {products.map((product, index) => (
+      {products.map((product) => (
         <WishlishtEachcard 
-          key={index}
+          key={product._id}
           product={product}
-          id={items[index]} 
+          id={product._id} 
           setreload={setReload} 
           reload={reload}
         />
       ))}
     </div>
   );
+};
+
+WishlistCard.propTypes = {
+  products: PropTypes.array.isRequired,
+  setReload: PropTypes.func.isRequired,
+  reload: PropTypes.bool.isRequired
 };
 
 export default WishlistCard;

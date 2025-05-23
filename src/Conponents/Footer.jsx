@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import logo from '../assets/img/logo.jpeg' 
+import logo from '../assets/img/logo11.png' 
 export const Footer = () => {
   return (
    <footer className="bg-white text-black border-t ">
@@ -20,7 +20,7 @@ export const Footer = () => {
     {/* BRANDS & SOCIAL */}
     <div className="col-span-1 md:col-span-1 text-center">
       {/* <img src="/logo.png" alt="Logo" className="w-24 mx-auto mb-2" /> */}
-      <h1><img className='w-20 mx-auto' src={logo} alt="logo" /></h1>
+      <h1><img className='w-44 mx-auto' src={logo} alt="logo" /></h1>
 
   <div className="flex justify-center gap-4 my-2">
   <a href="https://www.facebook.com/profile.php?id=61550942862694" target="_blank" rel="noopener noreferrer">

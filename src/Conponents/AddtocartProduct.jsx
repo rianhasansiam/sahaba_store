@@ -8,20 +8,34 @@ const AddtocartProduct = ({ item, quantity, onQuantityChange, onDelete }) => {
   const [error, setError] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
-  
-  // Available size options - memoized to avoid unnecessary re-renders
-  const availableSizes = useMemo(() => ["250 ml", "500 ml", "1000 ml"], []);
+    // Available size options - memoized to avoid unnecessary re-renders
+  const availableSizes = useMemo(() => {
+    // If product has price variants, use those quantities
+    if (item.priceVariants && item.priceVariants.length > 0) {
+      return item.priceVariants.map(variant => variant.quantity);
+    }
+    // Otherwise use default sizes
+    return ["250 ml", "500 ml", "1000 ml"];
+  }, [item]);
   
   // Get the quantity and size from the cart data
   const [productQuantities, setProductQuantities] = useState(
     quantity?.quantity || 1
   );
   const [productSize, setProductSize] = useState(
-    quantity?.size && availableSizes.includes(quantity.size) ? quantity.size : "250 ml"
+    quantity?.size && availableSizes.includes(quantity.size) ? quantity.size : availableSizes[0]
   );
-  
-  // Calculate price based on size
+    // Calculate price based on size and variants
   const getPriceBasedOnSize = (basePrice, size, qty) => {
+    // If product has price variants, use those
+    if (item.priceVariants && item.priceVariants.length > 0) {
+      const variant = item.priceVariants.find(v => v.quantity === size);
+      if (variant) {
+        return (parseFloat(variant.price) * qty).toFixed(2);
+      }
+    }
+    
+    // Fallback to manual calculation for products without variants
     const price = parseFloat(basePrice);
     if (!price) return "0.00";
     
@@ -58,9 +72,8 @@ const AddtocartProduct = ({ item, quantity, onQuantityChange, onDelete }) => {
       }
       setHasChanges(false); // Reset changes flag on prop update
     }
-  }, [quantity, availableSizes]);
-  // Save changes to parent component and localStorage
-  const saveChanges = () => {
+  }, [quantity, availableSizes]);  // Update cart with current values and validate inventory
+  const updateCart = () => {
     if (!onQuantityChange || !item?._id) return;
     
     // Validate against available inventory
@@ -71,23 +84,16 @@ const AddtocartProduct = ({ item, quantity, onQuantityChange, onDelete }) => {
     
     setIsSaving(true);
     
-    try {
-      // Update parent component state which will update localStorage
-      onQuantityChange(item._id, { quantity: productQuantities, size: productSize });
-      
-      // Show success message
-      toast.success("Cart updated successfully");
-      setHasChanges(false);
-      
-      setTimeout(() => {
-        setIsSaving(false);
-      }, 1000);
-    } catch (error) {
-      console.error("Error updating cart:", error);
-      toast.error("Failed to update cart");
+    // Update parent component state which will update localStorage
+    onQuantityChange(item._id, { quantity: productQuantities, size: productSize });
+    
+    toast.success("Cart updated");
+    setHasChanges(false);
+    
+    setTimeout(() => {
       setIsSaving(false);
-    }
-  };  // Handle item removal with confirmation - local storage only
+    }, 1000);
+  };
   const handleRemove = (id) => {
     setError(null);
 
@@ -132,39 +138,14 @@ const AddtocartProduct = ({ item, quantity, onQuantityChange, onDelete }) => {
       return;
     }
     setProductQuantities((prev) => Math.max(1, prev - 1));
-    setHasChanges(true);
-  }
+    setHasChanges(true);  }
     // This function is handled directly in the onChange of the select element
 
-  // Update cart with current values and validate inventory
-  const updateCart = () => {
-    if (!onQuantityChange || !item?._id) return;
-    
-    // Validate against available inventory
-    if (item.availableAmount !== undefined && productQuantities > item.availableAmount) {
-      toast.error(`Only ${item.availableAmount} items available in stock`);
-      return;
-    }
-    
-    setIsSaving(true);
-    
-    // Update parent component state which will update localStorage
-    onQuantityChange(item._id, { quantity: productQuantities, size: productSize });
-    
-    toast.success("Cart updated");
-    setHasChanges(false);
-    
-    setTimeout(() => {
-      setIsSaving(false);
-    }, 1000);
-  };
-
   return (
-    <div className="py-6 flex flex-col sm:flex-row">
-      <div className="flex-shrink-0 mb-4 sm:mb-0">
+    <div className="py-6 flex flex-col sm:flex-row">      <div className="flex-shrink-0 mb-4 sm:mb-0">
         <img
           className="h-32 w-32 rounded-md object-cover"
-          src={item.image}
+          src={item.thumbnail || item.image}
           alt={item.name}
         />
       </div>
@@ -177,8 +158,7 @@ const AddtocartProduct = ({ item, quantity, onQuantityChange, onDelete }) => {
             <div className="mt-3 flex flex-col sm:flex-row sm:items-end gap-3">
               <div>
                 <label htmlFor={`size-${item._id}`} className="text-gray-600 text-sm font-medium block mb-1">Size:</label>
-                <div className="flex items-center">
-                  <select 
+                <div className="flex items-center">                  <select 
                     id={`size-${item._id}`}
                     value={productSize}
                     onChange={(e) => {
@@ -188,9 +168,9 @@ const AddtocartProduct = ({ item, quantity, onQuantityChange, onDelete }) => {
                     }}
                     className="text-sm border border-gray-300 rounded-md py-1.5 px-2 focus:outline-none focus:ring-1 focus:ring-[#22874b] focus:border-[#22874b] transition-colors"
                   >
-                    <option value="250 ml">250 ml</option>
-                    <option value="500 ml">500 ml</option>
-                    <option value="1000 ml">1000 ml</option>
+                    {availableSizes.map((size) => (
+                      <option key={size} value={size}>{size}</option>
+                    ))}
                   </select>
                   <ProductSizeTag size={productSize} className="ml-2" />
                 </div>

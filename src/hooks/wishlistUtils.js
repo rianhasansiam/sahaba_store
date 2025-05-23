@@ -8,15 +8,10 @@ import { toast } from 'react-toastify';
  */
 export const getWishlistItems = () => {
   try {
-    let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+    const wishlist = JSON.parse(localStorage.getItem('wishlist')) || {};
     
-    // Ensure we're returning an array of productIds
-    if (!Array.isArray(wishlist)) {
-      // If it's an object, convert to array of keys
-      wishlist = Object.keys(wishlist);
-    }
-    
-    return wishlist;
+    // Convert object format to array of IDs
+    return Object.keys(wishlist);
   } catch (error) {
     console.error('Error getting wishlist:', error);
     return [];
@@ -32,16 +27,16 @@ export const addToWishlist = (productId) => {
   if (!productId) return false;
   
   try {
-    let wishlist = getWishlistItems();
+    let wishlist = JSON.parse(localStorage.getItem('wishlist')) || {};
     
     // Check if item already exists in wishlist
-    if (wishlist.includes(productId)) {
+    if (wishlist[productId]) {
       toast.info('Item already in wishlist');
       return false;
     }
     
     // Add item to wishlist
-    wishlist.push(productId);
+    wishlist[productId] = true;
     
     // Save to localStorage
     localStorage.setItem('wishlist', JSON.stringify(wishlist));
@@ -63,10 +58,15 @@ export const removeFromWishlist = (productId) => {
   if (!productId) return false;
   
   try {
-    let wishlist = getWishlistItems();
+    let wishlist = JSON.parse(localStorage.getItem('wishlist')) || {};
     
-    // Filter out the item to remove
-    wishlist = wishlist.filter(id => id !== productId);
+    // Check if item exists in wishlist
+    if (!wishlist[productId]) {
+      return false;
+    }
+    
+    // Remove item from wishlist
+    delete wishlist[productId];
     
     // Save to localStorage
     localStorage.setItem('wishlist', JSON.stringify(wishlist));
@@ -88,8 +88,8 @@ export const isInWishlist = (productId) => {
   if (!productId) return false;
   
   try {
-    const wishlist = getWishlistItems();
-    return wishlist.includes(productId);
+    const wishlist = JSON.parse(localStorage.getItem('wishlist')) || {};
+    return !!wishlist[productId];
   } catch (error) {
     console.error('Error checking wishlist:', error);
     return false;
@@ -102,9 +102,9 @@ export const isInWishlist = (productId) => {
  */
 export const moveWishlistToCart = () => {
   try {
-    const wishlist = getWishlistItems();
+    const wishlistItems = getWishlistItems();
     
-    if (wishlist.length === 0) {
+    if (wishlistItems.length === 0) {
       toast.info('Wishlist is empty');
       return false;
     }
@@ -112,17 +112,32 @@ export const moveWishlistToCart = () => {
     // Get current cart
     let cart = JSON.parse(localStorage.getItem('addtocart')) || {};
     
+    // Get product data from API if available, otherwise use minimal data
+    // Since we can't make API calls directly here, we'll create a basic entry
+    // that will be updated with full product data when the cart loads
+    
     // Add each wishlist item to cart
-    wishlist.forEach(productId => {
+    let addedCount = 0;
+    
+    wishlistItems.forEach(productId => {
       // Only add if not already in cart
       if (!cart[productId]) {
-        cart[productId] = { quantity: 1, size: "250 ml" };
+        cart[productId] = { 
+          quantity: 1, 
+          size: "250ml" // Default size - will be updated when full product data loads
+        };
+        addedCount++;
       }
     });
     
     // Save updated cart
     localStorage.setItem('addtocart', JSON.stringify(cart));
-    toast.success('All items moved to cart');
+    
+    if (addedCount > 0) {
+      toast.success(`${addedCount} item${addedCount > 1 ? 's' : ''} moved to cart`);
+    } else {
+      toast.info('All items already in cart');
+    }
     return true;
   } catch (error) {
     console.error('Error moving wishlist to cart:', error);

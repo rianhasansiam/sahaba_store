@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { FaSearch } from 'react-icons/fa';
+import { FaSearch, FaTimes, FaPlus, FaTrash } from 'react-icons/fa';
 import { useFetchData } from '../../hooks/useFetchData';
 import { usePostData } from '../../hooks/usePostData';
 import { useUpdateData } from '../../hooks/useUpdateData';
@@ -16,18 +16,21 @@ const AllProducts = () => {
     description: '',
     price: '',
     category: '',
-    image: '',
-    shortDescription:''
+    thumbnail: '',
+    images: [],
+    shortDescription: '',
+    priceVariants: []
   });
   
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editId, setEditId] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState(''); // Search state
+  const [currentUploadType, setCurrentUploadType] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const fileInputRef = useRef(null);
-  
+  const thumbnailInputRef = useRef(null);
+  const galleryInputRef = useRef(null);
 
   // Fetch categories and products
   const { data: categories = [], isLoading: isCategoriesLoading } = useFetchData('categories', '/allcategories');
@@ -43,69 +46,151 @@ const AllProducts = () => {
     setProductForm(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const handleAddPriceVariant = () => {
+    setProductForm(prev => ({
+      ...prev,
+      priceVariants: [...prev.priceVariants, { quantity: '', price: '' }]
+    }));
+  };
 
-    // Check if file is an image
-    if (!file.type.match('image.*')) {
-      toast.error('Please select an image file');
-      return;
+  const handleRemovePriceVariant = (index) => {
+    setProductForm(prev => ({
+      ...prev,
+      priceVariants: prev.priceVariants.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handlePriceVariantChange = (index, field, value) => {
+    setProductForm(prev => {
+      const updatedVariants = [...prev.priceVariants];
+      updatedVariants[index] = {
+        ...updatedVariants[index],
+        [field]: value
+      };
+      return {
+        ...prev,
+        priceVariants: updatedVariants
+      };
+    });
+  };
+
+  const handleImageUpload = async (e, type) => {
+    const files = type === 'thumbnail' ? [e.target.files[0]] : Array.from(e.target.files);
+    if (files.length === 0 || !files[0]) return;
+
+    // Validate files
+    for (const file of files) {
+      if (!file.type.match('image.*')) {
+        toast.error('Please select only image files');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size should be less than 5MB');
+        return;
+      }
     }
 
-    // Check file size (5MB limit)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image size should be less than 5MB');
+    // Check limits
+    if (type === 'gallery' && productForm.images.length + files.length > 5) {
+      toast.error('You can upload maximum 5 additional images');
       return;
     }
-
-    const formData = new FormData();
-    formData.append('image', file);
 
     try {
       setIsUploading(true);
+      setCurrentUploadType(type);
+      const uploadedUrls = [];
 
-      // Upload to ImgBB
-      const imgbbResponse = await fetch(`https://api.imgbb.com/1/upload?key=${import.meta.env.VITE_IMGBB_API_KEY}`, {
-        method: 'POST',
-        body: formData,
-      });
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append('image', file);
 
-      const imgbbData = await imgbbResponse.json();
+        const imgbbResponse = await fetch(
+          `https://api.imgbb.com/1/upload?key=${import.meta.env.VITE_IMGBB_API_KEY}`,
+          { method: 'POST', body: formData }
+        );
+        const imgbbData = await imgbbResponse.json();
 
-      if (imgbbData.success) {
-        setProductForm(prev => ({ ...prev, image: imgbbData.data.url }));
-        toast.success('Image uploaded successfully!');
+        if (imgbbData.success) {
+          uploadedUrls.push(imgbbData.data.url);
+        } else {
+          throw new Error(imgbbData.error?.message || 'Failed to upload image');
+        }
+      }
+
+      if (type === 'thumbnail') {
+        setProductForm(prev => ({ ...prev, thumbnail: uploadedUrls[0] }));
+        toast.success('Thumbnail uploaded successfully!');
       } else {
-        throw new Error(imgbbData.error?.message || 'Failed to upload image');
+        setProductForm(prev => ({
+          ...prev,
+          images: [...prev.images, ...uploadedUrls]
+        }));
+        toast.success(`${uploadedUrls.length} image(s) added to gallery!`);
       }
     } catch (error) {
       console.error('Image upload error:', error);
-      toast.error(error.message || 'Failed to upload image');
+      toast.error(error.message || 'Failed to upload images');
     } finally {
       setIsUploading(false);
+      setCurrentUploadType(null);
+      if (type === 'thumbnail' && thumbnailInputRef.current) {
+        thumbnailInputRef.current.value = '';
+      }
+      if (type === 'gallery' && galleryInputRef.current) {
+        galleryInputRef.current.value = '';
+      }
     }
   };
 
-  const handleRemoveImage = () => {
-    setProductForm(prev => ({ ...prev, image: '' }));
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+  const handleRemoveImage = (index, type) => {
+    if (type === 'thumbnail') {
+      setProductForm(prev => ({ ...prev, thumbnail: '' }));
+    } else {
+      setProductForm(prev => ({
+        ...prev,
+        images: prev.images.filter((_, i) => i !== index)
+      }));
     }
   };
 
-  const handleSubmit = () => {
-    if (!productForm.name || !productForm.productId) {
+  const handleSubmit = () => {    if (!productForm.name || !productForm.productId) {
       toast.error('Product ID and Name are required');
       return;
+    }    
+    
+    if (!productForm.category) {
+      toast.error('Please select a category');
+      return;
     }
-
+    
+    if (!productForm.thumbnail) {
+      toast.error('Thumbnail image is required');
+      return;
+    }
+    
+    // Always validate the price field
+    if (!productForm.price) {
+      toast.error('Please enter a price range for the product');
+      return;
+    }const invalidVariants = productForm.priceVariants.some(
+      variant => !variant.quantity || !variant.price || isNaN(variant.price)
+    );
+    
+    if (invalidVariants) {
+      toast.error('Please fill all quantity and price fields for variants with valid numbers');
+      return;
+    }    // Prepare the payload
     const payload = {
       ...productForm,
-      price: parseFloat(productForm.price) || 0,
-      availableAmount: productForm.availableAmount || 0,
+      // Always keep price as string to support ranges like "100-500", regardless of variants
+      price: productForm.price,
+      availableAmount: parseInt(productForm.availableAmount) || 0,
       category: productForm.category || null,
-      image: productForm.image || null
+      priceVariants: productForm.priceVariants.map(variant => ({
+        quantity: variant.quantity,
+        price: parseFloat(variant.price) || 0
+      }))
     };
 
     if (editMode) {
@@ -142,10 +227,12 @@ const AllProducts = () => {
       name: product.name,
       availableAmount: product.availableAmount,
       description: product.description,
-      price: product.price.toString(),
+      price: product.price?.toString() || '',
       category: product.category?._id || product.category || '',
-      image: product.image || '',
-      shortDescription: product.shortDescription || ''
+      thumbnail: product.thumbnail || '',
+      images: product.images || [],
+      shortDescription: product.shortDescription || '',
+      priceVariants: product.priceVariants || []
     });
     setEditMode(true);
     setEditId(product._id);
@@ -184,12 +271,13 @@ const AllProducts = () => {
       description: '',
       price: '',
       category: '',
-      image: '',
-      shortDescription: ''
+      thumbnail: '',
+      images: [],
+      shortDescription: '',
+      priceVariants: []
     });
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    if (thumbnailInputRef.current) thumbnailInputRef.current.value = '';
+    if (galleryInputRef.current) galleryInputRef.current.value = '';
     setShowModal(false);
     setEditMode(false);
     setEditId(null);
@@ -209,7 +297,6 @@ const AllProducts = () => {
     return category?.name || 'Unknown Category';
   };
 
-  // Filter products by name, productId, or category name
   const filteredProducts = products.filter(product => {
     const name = product.name?.toLowerCase() || '';
     const productId = product.productId?.toLowerCase() || '';
@@ -219,7 +306,29 @@ const AllProducts = () => {
       productId.includes(searchTerm.toLowerCase()) ||
       categoryName.includes(searchTerm.toLowerCase())
     );
-  });
+  });  const renderProductPrice = (product) => {
+    let priceDisplay = [];
+    
+    // Always show the price range if it exists
+    if (product.price) {
+      priceDisplay.push(<div key="base-price" className="font-semibold">{product.price} BDT</div>);
+    }
+
+    // Add variants if they exist
+    if (product.priceVariants?.length > 0) {
+      priceDisplay.push(
+        <div key="variants" className="text-xs space-y-1 mt-1">
+          {product.priceVariants.map((variant, index) => (
+            <div key={index}>
+              {variant.quantity}: {parseFloat(variant.price).toFixed(2)} BDT
+            </div>
+          ))}
+        </div>
+      );
+    }
+    
+    return priceDisplay.length > 0 ? priceDisplay : 'Price not set';
+  };
 
   return (
     <div className="p-6">
@@ -249,12 +358,13 @@ const AllProducts = () => {
       {/* Add/Edit Product Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl overflow-y-auto max-h-screen">
             <h2 className="text-xl font-bold mb-4">
               {editMode ? 'Edit Product' : 'Add New Product'}
             </h2>
             
             <div className="space-y-4">
+              {/* Product ID */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Product ID *
@@ -270,6 +380,7 @@ const AllProducts = () => {
                 />
               </div>
 
+              {/* Product Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Product Name *
@@ -283,17 +394,17 @@ const AllProducts = () => {
                   placeholder="Enter product name"
                   required
                 />
-              </div>
-
+              </div>              {/* Category */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Category
+                  Category *
                 </label>
                 <select
                   name="category"
                   value={productForm.category}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border rounded-md"
+                  required
                 >
                   <option value="">Select a category</option>
                   {categories.map((category) => (
@@ -302,39 +413,100 @@ const AllProducts = () => {
                     </option>
                   ))}
                 </select>
-              </div>
-
+              </div>{/* Base Price - Always show this field */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Price (BDT)
+                  Base Price (BDT) *
                 </label>
                 <input
-                  type="number"
+                  type="text"
                   name="price"
                   value={productForm.price}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border rounded-md"
-                  placeholder="0.00"
-                  min="0"
-                  step="0.01"
+                  placeholder="100-500"
+                  required={productForm.priceVariants.length === 0}
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Enter a price range (e.g., 100-500)
+                </p>
               </div>
 
+              {/* Price Variants */}
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Quantity Variants
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleAddPriceVariant}
+                    className="flex items-center text-sm text-blue-600 hover:text-blue-800"
+                  >
+                    <FaPlus className="mr-1" /> Add Quantity
+                  </button>
+                </div>
+
+                {productForm.priceVariants.length === 0 ? (
+                  <p className="text-xs text-gray-500">No quantity variants added</p>
+                ) : (
+                  <div className="space-y-3">
+                    {productForm.priceVariants.map((variant, index) => (
+                      <div key={index} className="grid grid-cols-5 gap-3 items-center">
+                        <div className="col-span-2">
+                          <input
+                            type="text"
+                            value={variant.quantity}
+                            onChange={(e) => handlePriceVariantChange(index, 'quantity', e.target.value)}
+                            className="w-full px-3 py-2 border rounded-md"
+                            placeholder="e.g. 250ml, 500g"
+                            required
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <input
+                            type="number"
+                            value={variant.price}
+                            onChange={(e) => handlePriceVariantChange(index, 'price', e.target.value)}
+                            className="w-full px-3 py-2 border rounded-md"
+                            placeholder="Price"
+                            min="0"
+                            step="0.01"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePriceVariant(index)}
+                            className="text-red-500 hover:text-red-700 p-2"
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Available Amount */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Available Product
+                  Available Quantity
                 </label>
                 <input
-                  type="text"
+                  type="number"
                   name="availableAmount"
                   value={productForm.availableAmount}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border rounded-md"
                   placeholder="0"
-                  
+                  min="0"
                 />
               </div>
               
+              {/* Short Description */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                  Short Description
@@ -346,10 +518,10 @@ const AllProducts = () => {
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border rounded-md"
                   placeholder="Short Description...."
-                 
                 />
               </div>
 
+              {/* Description */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Description
@@ -364,56 +536,118 @@ const AllProducts = () => {
                 />
               </div>
 
+              {/* Thumbnail Image */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Product Image
+                  Thumbnail Image *
                 </label>
-                {productForm.image ? (
+                {productForm.thumbnail ? (
                   <div className="mt-2">
                     <img 
-                      src={productForm.image} 
-                      alt="Product preview" 
-                      className="h-32 object-cover rounded-md"
+                      src={productForm.thumbnail} 
+                      alt="Thumbnail preview" 
+                      className="h-32 w-32 object-cover rounded-md"
                     />
                     <button
                       type="button"
-                      onClick={handleRemoveImage}
+                      onClick={() => handleRemoveImage(null, 'thumbnail')}
                       className="mt-2 text-sm text-red-600 hover:text-red-800"
                     >
-                      Remove Image
+                      Remove Thumbnail
                     </button>
                   </div>
                 ) : (
                   <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                     <div className="space-y-1 text-center">
-                      <div className="flex text-sm text-gray-600">
+                      <div className="flex text-sm text-gray-600 justify-center">
                         <label
-                          htmlFor="file-upload"
+                          htmlFor="thumbnail-upload"
                           className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none"
                         >
-                          <span>Upload an image</span>
+                          <span>Upload thumbnail</span>
                           <input
-                            id="file-upload"
-                            name="file-upload"
+                            id="thumbnail-upload"
+                            name="thumbnail-upload"
                             type="file"
                             className="sr-only"
-                            onChange={handleImageUpload}
-                            ref={fileInputRef}
+                            onChange={(e) => handleImageUpload(e, 'thumbnail')}
+                            ref={thumbnailInputRef}
                             accept="image/*"
-                            disabled={isUploading}
+                            disabled={isUploading && currentUploadType === 'thumbnail'}
                           />
                         </label>
-                        <p className="pl-1">or drag and drop</p>
                       </div>
                       <p className="text-xs text-gray-500">
                         PNG, JPG, GIF up to 5MB
                       </p>
-                      {isUploading && (
-                        <p className="text-xs text-blue-500">Uploading image...</p>
+                      {isUploading && currentUploadType === 'thumbnail' && (
+                        <p className="text-xs text-blue-500">Uploading thumbnail...</p>
                       )}
                     </div>
                   </div>
                 )}
+              </div>
+
+              {/* Additional Images */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Additional Images (Max 5)
+                </label>
+                {productForm.images.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2 mb-4">
+                    {productForm.images.map((image, index) => (
+                      <div key={index} className="relative">
+                        <img 
+                          src={image} 
+                          alt={`Product image ${index + 1}`} 
+                          className="h-24 w-full object-cover rounded-md"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(index, 'gallery')}
+                          className="absolute top-1 right-1 bg-white rounded-full p-1 shadow-sm hover:bg-gray-100"
+                        >
+                          <FaTimes className="text-red-500 text-xs" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                  <div className="space-y-1 text-center">
+                    <div className="flex text-sm text-gray-600 justify-center">
+                      <label
+                        htmlFor="gallery-upload"
+                        className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none"
+                      >
+                        <span>Upload additional images</span>
+                        <input
+                          id="gallery-upload"
+                          name="gallery-upload"
+                          type="file"
+                          className="sr-only"
+                          onChange={(e) => handleImageUpload(e, 'gallery')}
+                          ref={galleryInputRef}
+                          accept="image/*"
+                          disabled={isUploading && currentUploadType === 'gallery' || productForm.images.length >= 5}
+                          multiple
+                        />
+                      </label>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      PNG, JPG, GIF up to 5MB each
+                    </p>
+                    {isUploading && currentUploadType === 'gallery' && (
+                      <p className="text-xs text-blue-500">Uploading images...</p>
+                    )}
+                    {productForm.images.length > 0 && (
+                      <p className="text-xs text-gray-500">
+                        {productForm.images.length}/5 images uploaded
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -441,7 +675,7 @@ const AllProducts = () => {
       {/* Products Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         {isLoading ? (
-         <LoadingPage></LoadingPage>
+          <LoadingPage></LoadingPage>
         ) : isError ? (
           <div className="p-6 text-center text-red-500">
             Failed to load products. Please try again.
@@ -456,7 +690,7 @@ const AllProducts = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Image
+                    Thumbnail
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Product ID
@@ -485,16 +719,19 @@ const AllProducts = () => {
                 {filteredProducts.map((product) => (
                   <tr key={product._id}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {product.image ? (
+                      {product.thumbnail ? (
                         <img 
-                          src={product.image} 
-                          alt={product.name} 
+                          src={product.thumbnail} 
+                          alt="Thumbnail" 
                           className="h-10 w-10 rounded-full object-cover"
                         />
                       ) : (
                         <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                          <span className="text-xs text-gray-500">No Image</span>
+                          <span className="text-xs text-gray-500">No Thumbnail</span>
                         </div>
+                      )}
+                      {product.images?.length > 0 && (
+                        <span className="ml-1 text-xs text-gray-500">+{product.images.length}</span>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -512,7 +749,7 @@ const AllProducts = () => {
                       {formatDate(product.createdAt)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {parseFloat(product.price).toFixed(2)} BDT
+                      {renderProductPrice(product)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <span className={`px-2 py-1 rounded-full text-xs ${

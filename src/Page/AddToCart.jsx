@@ -330,17 +330,16 @@ const AddToCart = () => {
       }
     }
 
-    const checkoutProductsArr = validItems.map(item => {
-      const cartItem = cartQuantities[item._id];
+    const checkoutProductsArr = validItems.map(item => {      const cartItem = cartQuantities[item._id];
       const size = cartItem?.size || "250 ml";
       const quantity = cartItem?.quantity || 1;
       const basePrice = typeof item.price === "number" ? item.price : Number(item.price) || 0;
       
       // Calculate size-adjusted price
-      const adjustedPrice = getPriceBasedOnSize(basePrice, size, 1); // Per unit price with size adjustment
+      const adjustedPrice = getPriceBasedOnSize(basePrice, size, 1, item); // Per unit price with size adjustment
       
       return {
-        image: item.image,
+        image: item.thumbnail || item.image,
         price: adjustedPrice, // Size-adjusted price per unit
         productId: item.productId || item._id,
         name: item.name,
@@ -355,9 +354,17 @@ const AddToCart = () => {
     // Redirect to checkout page
     navigate('/checkout');
   };
-
-  // Helper function to calculate price based on size
-  const getPriceBasedOnSize = (basePrice, size, qty) => {
+  // Helper function to calculate price based on size and variants
+  const getPriceBasedOnSize = (basePrice, size, qty, item) => {
+    // If the item is provided and has price variants, use those
+    if (item && item.priceVariants && item.priceVariants.length > 0) {
+      const variant = item.priceVariants.find(v => v.quantity === size);
+      if (variant) {
+        return parseFloat(variant.price) * qty;
+      }
+    }
+    
+    // Otherwise, do the default calculation
     const price = parseFloat(basePrice);
     if (!price) return 0;
     
@@ -375,7 +382,6 @@ const AddToCart = () => {
     
     return price * multiplier * qty;
   };
-
   // Calculations
   const subtotal = useMemo(() => {
     return cartItems.reduce((sum, item) => {
@@ -387,7 +393,7 @@ const AddToCart = () => {
           ? item.price 
           : Number(item.price) || 0;
         
-        return sum + getPriceBasedOnSize(price, size, quantity);
+        return sum + getPriceBasedOnSize(price, size, quantity, item);
       } catch (error) {
         console.error("Error calculating price for item:", item, error);
         return sum;
@@ -617,7 +623,7 @@ const AddToCart = () => {
                 <div key={product._id} className="bg-white rounded-lg shadow-md overflow-hidden">
                   <div className="relative pb-[60%]">
                     <img 
-                      src={product.image || 'https://via.placeholder.com/300x180'} 
+                      src={product.thumbnail || 'https://via.placeholder.com/300x180'} 
                       alt={product.name}
                       className="absolute h-full w-full object-cover"
                     />
@@ -626,7 +632,7 @@ const AddToCart = () => {
                     <h3 className="font-medium text-gray-900 mb-1 truncate">{product.name}</h3>
                     <p className="text-gray-500 text-sm mb-3 line-clamp-1">{product.shortDescription}</p>
                     <div className="flex justify-between items-center">
-                      <span className="font-bold text-[#22874b]">{formatCurrency(product.price)}</span>
+                      <span className="font-bold text-[#22874b]">{product?.price} BDT</span>
                       <Link 
                         to={`/product-details/${product._id}`}
                         className="text-[#22874b] hover:text-[#1a6b3a] text-sm font-medium"

@@ -1,53 +1,57 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useFetchData } from '../hooks/useFetchData';
 import { useState, useContext, useEffect, useMemo } from 'react';
-import { FaStar, FaShoppingCart, FaHeart, FaShare } from 'react-icons/fa';
+import { FaStar, FaShoppingCart, FaHeart, FaShare, FaArrowRight } from 'react-icons/fa';
 import { contextData } from '../Contex';
 import api from '../hooks/api';
 import { toast } from 'react-toastify';
 import LoadingPage from '../Conponents/LoadingPage';
-import ProductSizeTag from '../Conponents/ProductSizeTag';
+import details1 from '../assets/img/details1.jpg';
+import details2 from '../assets/img/details2.png';  
+import details3 from '../assets/img/details3.png';
+
 
 const ProductDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
-  const [selectedSize, setSelectedSize] = useState("250 ml");
+  const [selectedVariant, setSelectedVariant] = useState(null);
   const { data: product, isLoading, error } = useFetchData(
     'product',
     `/products/${id}`
   );
-  const { userData } = useContext(contextData);
+  const { userData, setCheckoutProducts, setFinalPrice } = useContext(contextData);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isBuyingNow, setIsBuyingNow] = useState(false);
   
-  // Available size options - memoized to avoid unnecessary re-renders
-  const availableSizes = useMemo(() => ["250 ml", "500 ml", "1000 ml"], []);
-
-  // Calculate price based on size
-  const getPriceBasedOnSize = (basePrice, size) => {
-    const price = parseFloat(basePrice);
-    if (!price) return 0;
+  // Set the selected variant when product data loads
+  useEffect(() => {
+    if (product?.priceVariants?.length > 0) {
+      setSelectedVariant(product.priceVariants[0]);
+    }
+  }, [product]);
+  
+  // Get price range from the product price field
+  const priceRange = useMemo(() => {
+    if (!product?.price) return { min: 0, max: 0 };
     
-    let multiplier = 1;
-    switch(size) {
-      case "500 ml":
-        multiplier = 1.8; // 80% more for double size
-        break;
-      case "1000 ml":
-        multiplier = 3; // 3x price for 1 liter
-        break;
-      default: // 250 ml
-        multiplier = 1;
+    if (product.price.includes('-')) {
+      const [min, max] = product.price.split('-').map(p => parseFloat(p.trim()));
+      return { min, max };
     }
     
-    return price * multiplier;
-  };
+    const singlePrice = parseFloat(product.price);
+    return { min: singlePrice, max: singlePrice };
+  }, [product]);
   
-  // Calculated size-adjusted price
-  const adjustedPrice = useMemo(() => {
-    if (!product?.price) return 0;
-    return getPriceBasedOnSize(product.price, selectedSize);
-  }, [product, selectedSize]);
+  // Get current price based on selected variant
+  const currentPrice = useMemo(() => {
+    if (selectedVariant) {
+      return selectedVariant.price;
+    }
+    return priceRange.min;
+  }, [selectedVariant, priceRange]);
 
   // Check if product is in wishlist
   useEffect(() => {
@@ -107,11 +111,18 @@ const ProductDetails = () => {
     setQuantity(newQuantity);
   };
 
-  const handleAddToCart = async () => {
+  const handleVariantChange = (variant) => {
+    setSelectedVariant(variant);
+  };  const handleAddToCart = async () => {
     if (!product) return;
     
     if (product.availableAmount <= 0) {
       toast.error('This product is out of stock');
+      return;
+    }
+
+    if (!selectedVariant && product.priceVariants?.length > 0) {
+      toast.error('Please select a variant');
       return;
     }
 
@@ -120,11 +131,36 @@ const ProductDetails = () => {
       // Get current cart data
       const cartData = JSON.parse(localStorage.getItem('addtocart')) || {};
       
-      // Update cart with size and quantity data
-      cartData[product._id] = {
+      // Check if this product already exists in cart
+      const isProductInCart = !!cartData[product._id];
+      const newCartItem = {
         quantity: quantity,
-        size: selectedSize
+        variant: selectedVariant ? selectedVariant.quantity : null,
+        price: selectedVariant ? selectedVariant.price : currentPrice,
+        name: product.name,
+        thumbnail: product.thumbnail,
+        productId: product.productId
       };
+      
+      // If product exists in cart with same variant, update quantity
+      if (isProductInCart) {
+        const existingItem = cartData[product._id];
+        // If same variant or both have no variants, increment quantity
+        if ((existingItem.variant === newCartItem.variant) || 
+            (!existingItem.variant && !newCartItem.variant)) {
+          newCartItem.quantity = existingItem.quantity + quantity;
+          
+          // Check if quantity exceeds available amount
+          if (product.availableAmount && newCartItem.quantity > product.availableAmount) {
+            newCartItem.quantity = product.availableAmount;
+            toast.warning(`Cart quantity limited to available stock (${product.availableAmount})`);
+          }
+        }
+        // Otherwise it's a different variant of same product, replace it
+      }
+      
+      // Update cart with the new item
+      cartData[product._id] = newCartItem;
       
       // Save to localStorage
       localStorage.setItem('addtocart', JSON.stringify(cartData));
@@ -134,13 +170,16 @@ const ProductDetails = () => {
         await api.put('/add-to-cart', {
           email: userData.email,
           productId: product._id,
-          quantity,
-          size: selectedSize
+          quantity: newCartItem.quantity,
+          variant: newCartItem.variant,
+          price: newCartItem.price
         });
       }
 
-      // Show success message with size information
-      toast.success(`${quantity} ${product.name} (${selectedSize}) added to cart`);
+      // Show success message with variant information
+      const variantInfo = selectedVariant ? `(${selectedVariant.quantity})` : '';
+      const actionMsg = isProductInCart ? 'updated in' : 'added to';
+      toast.success(`${product.name} ${variantInfo} ${actionMsg} cart`);
       
       // Trigger storage event for other components to detect the change
       window.dispatchEvent(new Event('storage'));
@@ -149,6 +188,58 @@ const ProductDetails = () => {
       toast.error(err.response?.data?.message || 'Failed to add to cart');
     } finally {
       setIsAddingToCart(false);
+    }
+  };
+  // Handler for Buy Now button
+  const handleBuyNow = () => {
+    if (!product) return;
+    
+    if (product.availableAmount <= 0) {
+      toast.error('This product is out of stock');
+      return;
+    }
+
+    if (!selectedVariant && product.priceVariants?.length > 0) {
+      toast.error('Please select a variant');
+      return;
+    }
+    
+    // Check if quantity is more than available stock
+    if (product.availableAmount && quantity > product.availableAmount) {
+      toast.error(`Only ${product.availableAmount} items available in stock`);
+      return;
+    }
+    
+    setIsBuyingNow(true);
+    try {
+      // Create a checkout product item with the current selection
+      const checkoutItem = {
+        image: product.thumbnail,
+        price: selectedVariant ? selectedVariant.price : currentPrice,
+        productId: product.productId || product._id,
+        id: product._id,
+        name: product.name,
+        quantity: quantity,
+        size: selectedVariant ? selectedVariant.quantity : null,
+        totalPrice: (selectedVariant ? selectedVariant.price : currentPrice) * quantity
+      };
+      
+      // Set this as the only checkout product in context
+      setCheckoutProducts([checkoutItem]);
+      
+      // Set the final price
+      setFinalPrice(checkoutItem.totalPrice);
+      
+      // Show success message
+      toast.success('Proceeding to checkout...');
+      
+      // Redirect to checkout page
+      navigate('/checkout');
+      
+    } catch (err) {
+      console.error('Buy now error:', err);
+      toast.error('Failed to proceed to checkout');
+      setIsBuyingNow(false);
     }
   };
 
@@ -163,11 +254,27 @@ const ProductDetails = () => {
         <div className="md:w-1/2">
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <img
-              src={product.image}
+              src={product.thumbnail}
               alt={product.name}
               className="w-full h-auto object-cover"
             />
           </div>
+          
+          {/* Product Gallery */}
+          {product.images && product.images.length > 0 && (
+            <div className="mt-4 grid grid-cols-4 gap-2">
+              {product.images.map((image, index) => (
+                <div key={index} className="border rounded-md overflow-hidden">
+                  <img 
+                    src={image} 
+                    alt={`${product.name} ${index + 1}`}
+                    className="w-full h-20 object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+          
           <div className="flex gap-2 mt-4">
             <button 
               onClick={handleWishlistToggle}
@@ -199,18 +306,23 @@ const ProductDetails = () => {
           </div>
 
           <div className="mb-6">
-            <span className="text-3xl font-bold text-gray-900">
-              {adjustedPrice.toFixed(2)} BDT
-            </span>
-            {product.originalPrice && (
-              <span className="ml-2 text-lg text-gray-500 line-through">
-                {product.originalPrice} BDT
-              </span>
+            {product.price && (
+              <div>
+                <span className="text-xl font-bold text-gray-700">
+                  Price Range: {product.price} BDT
+                </span>
+              </div>
             )}
-            {selectedSize !== "250 ml" && (
-              <p className="text-sm text-gray-500 mt-1">
-                Size-adjusted price for {selectedSize}
-              </p>
+            
+            {selectedVariant && (
+              <div className="mt-2">
+                <span className="text-3xl font-bold text-gray-900">
+                  {selectedVariant.price.toFixed(2)} BDT
+                </span>
+                <p className="text-sm text-gray-500 mt-1">
+                  Selected variant: {selectedVariant.quantity}
+                </p>
+              </div>
             )}
           </div>
 
@@ -232,30 +344,30 @@ const ProductDetails = () => {
                   : 'Out of Stock'}
               </span>
             </div>
+            <div className="font-medium mb-2">Product ID: <span className="font-normal">{product.productId}</span></div>
           </div>
           
-          {/* Size Selection */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-2">Select Size</h3>
-            <div className="grid grid-cols-3 gap-2">
-              {availableSizes.map((size) => (
-                <button
-                  key={size}
-                  onClick={() => setSelectedSize(size)}
-                  className={`py-2 px-3 border rounded-md flex items-center justify-center gap-1 ${
-                    selectedSize === size
-                      ? 'bg-[#22874b] text-white border-[#22874b]'
-                      : 'bg-white text-gray-700 border-gray-300 hover:border-[#22874b]'
-                  }`}
-                >
-                  <ProductSizeTag 
-                    size={size} 
-                    className={selectedSize === size ? "!bg-white !text-[#22874b]" : ""} 
-                  />
-                </button>
-              ))}
+          {/* Variant Selection */}
+          {product.priceVariants && product.priceVariants.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-2">Select Variant</h3>
+              <div className="grid grid-cols-3 gap-2">
+                {product.priceVariants.map((variant, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleVariantChange(variant)}
+                    className={`py-2 px-3 border rounded-md flex items-center justify-center gap-1 ${
+                      selectedVariant && selectedVariant.quantity === variant.quantity
+                        ? 'bg-[#22874b] text-white border-[#22874b]'
+                        : 'bg-white text-gray-700 border-gray-300 hover:border-[#22874b]'
+                    }`}
+                  >
+                    {variant.quantity}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
           
           {/* Quantity Selection */}
           <div className="mb-6">
@@ -281,9 +393,7 @@ const ProductDetails = () => {
                 +
               </button>
             </div>
-          </div>
-
-          <div className="flex items-center mb-8">
+          </div>          <div className="flex items-center gap-2 mb-8">
             <button 
               onClick={handleAddToCart}
               className={`flex-1 text-white py-3 px-6 rounded-lg flex items-center justify-center gap-2 ${
@@ -294,13 +404,26 @@ const ProductDetails = () => {
               disabled={product.availableAmount <= 0 || isAddingToCart}
             >
               <FaShoppingCart /> 
-              {isAddingToCart ? 'Adding...' : `Add to Cart (${selectedSize})`}
+              {isAddingToCart ? 'Adding...' : 'Add to Cart'}
+              {selectedVariant && ` (${selectedVariant.quantity})`}
             </button>
-          </div>
-
-          <div className="border-t border-gray-200 pt-4">
-            <h3 className="text-lg font-semibold mb-2">Product ID</h3>
-            <p className="text-gray-600">{product.productId}</p>
+            
+            <button 
+              onClick={handleBuyNow}
+              className={`flex-1 text-white py-3 px-6 rounded-lg flex items-center justify-center gap-2 ${
+                product.availableAmount <= 0 
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-[#e75b3a] hover:bg-[#d14e2f] font-medium'
+              }`}
+              disabled={product.availableAmount <= 0 || isBuyingNow}
+            >
+              {isBuyingNow ? 'Processing...' : (
+                <>
+                  Buy Now <FaArrowRight />
+                  {selectedVariant && ` (${selectedVariant.quantity})`}
+                </>
+              )}
+            </button>
           </div>
         </div>
       </div>
@@ -325,6 +448,44 @@ const ProductDetails = () => {
           <p className="text-gray-700 whitespace-pre-line">{product.description}</p>
         </div>
       </div>
+
+
+
+
+<div className='grid grid-cols-1 lg:grid-cols-3  mt-10  '>
+
+  <div className='flex  items-center justify-start'>
+    <img className='w-28' src={details1} alt="" />
+    <div>
+
+    <h2 className='font-bold text-lg'>নিরাপদ পেমেন্ট</h2>
+    <p className='text-sm'>বিভিন্ন পেমেন্ট পদ্ধতি থেকে বেছে নিন</p>
+    </div>
+  </div>
+  <div className='flex justify-start items-center'>
+    <img className='w-28' src={details2} alt="" />
+    <div>
+
+    <h2 className='font-bold text-lg'>ডেলেভারি</h2>
+    <p className='text-sm'>ঢাকা সিটির ভিতরে ১-২ দিন ঢাকা সিটির বাহিরে ২-৩ দিনের ভিতরে আপনার পন্য পৌছে যাবে
+১০০% ন্যাচারাল</p>
+    </div>
+  </div>
+  <div className='flex justify-start items-center'>
+    <img className='w-28' src={details3} alt="" />
+    <div>
+
+    <h2 className='font-bold text-lg'>১০০% ন্যাচারাল</h2>
+    <p className='text-sm'>প্রাকৃতিক উপাদান ব্যবহার করতে আমরা প্রতিশ্রুতিবদ্ধ</p>
+    </div>
+  </div>
+
+
+</div>
+
+
+
+      
     </div>
   );
 };
