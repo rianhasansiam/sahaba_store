@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useFetchData } from '../hooks/useFetchData';
 import { TrashIcon } from '@heroicons/react/24/outline';
+import LoadingPage from './LoadingPage';
 
 const AddtocartProduct = ({ productId, product, updateCart, removeFromCart }) => {
   const [quantity, setQuantity] = useState(product.quantity || 1);
@@ -86,7 +87,7 @@ const AddtocartProduct = ({ productId, product, updateCart, removeFromCart }) =>
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-24 border rounded-lg mb-4">
-        <p>Loading product...</p>
+        <LoadingPage></LoadingPage>
       </div>
     );
   }
