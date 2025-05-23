@@ -61,10 +61,7 @@ const ProductDetails = () => {
   }, [product]);
 
   const handleWishlistToggle = async () => {
-    if (!userData) {
-      toast.warn('Please login to manage your wishlist');
-      return;
-    }
+    
 
     try {
       const wishlist = JSON.parse(localStorage.getItem('wishlist')) || {};
