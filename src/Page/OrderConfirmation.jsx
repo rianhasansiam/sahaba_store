@@ -11,14 +11,10 @@ const OrderConfirmation = () => {
     _id: '68276cc06964e0d3e4c33f68',
     customer: {
       name: 'Customer',
-      email: '',
       phone: ''
     },
     shipping: {
-      address: '',
-      city: '',
-      country: '',
-      zipCode: ''
+      address: ''
     },
     payment: {
       method: '',
@@ -61,7 +57,6 @@ const OrderConfirmation = () => {
   }) : '';
 
   // Defensive helpers
-  const orderIdShort = order._id ? `#${String(order._id).slice(-8)}` : '#--------';
   const customerName = order.customer?.name || 'Customer';
   const customerFirstName = customerName.split(' ')[0] || customerName;
   const orderProducts = Array.isArray(order.products) ? order.products : [];
@@ -137,7 +132,7 @@ const OrderConfirmation = () => {
                     <div key={index} className="flex border-b border-gray-100 pb-4">
                       <div className="flex-shrink-0 mr-4">
                         <img
-                          src={product.image || 'https://via.placeholder.com/64'}
+                          src={product.thumbnail || product.image || 'https://via.placeholder.com/64'}
                           alt={product.name || 'Product'}
                           className="w-16 h-16 rounded-md object-cover"
                         />
@@ -145,7 +140,7 @@ const OrderConfirmation = () => {
                       <div className="flex-1">
                         <h4 className="font-medium text-gray-900">{product.name || 'Product'}</h4>
                         <p className="text-sm text-gray-500">Product ID: {product.productId || '--'}</p>
-                          <p className='border rounded-full border-[#22874b] w-20 text-center my-2 bg-green-100'>{product.size}</p>
+                        <p className='border rounded-full border-[#22874b] w-20 text-center my-2 bg-green-100'>{product.variant || product.size || '250ml'}</p>
                         <div className="flex justify-between mt-1">
                           <p className="text-sm">৳{(product.price || 0).toFixed(2)} × {product.quantity || 1}</p>
                           <p className="font-medium">৳{((product.price || 0) * (product.quantity || 1)).toFixed(2)}</p>
@@ -186,10 +181,6 @@ const OrderConfirmation = () => {
                   <p className="font-medium">{customerName}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Email</p>
-                  <p className="font-medium">{order.customer?.email || ''}</p>
-                </div>
-                <div>
                   <p className="text-sm text-gray-500">Phone</p>
                   <p className="font-medium">{order.customer?.phone || ''}</p>
                 </div>
@@ -205,20 +196,6 @@ const OrderConfirmation = () => {
                 <div>
                   <p className="text-sm text-gray-500">Address</p>
                   <p className="font-medium">{shipping.address || ''}</p>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-gray-500">City</p>
-                    <p className="font-medium">{shipping.city || ''}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Country</p>
-                    <p className="font-medium">{shipping.country || ''}</p>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">ZIP Code</p>
-                  <p className="font-medium">{shipping.zipCode || ''}</p>
                 </div>
               </div>
             </div>

@@ -118,13 +118,11 @@ export const moveWishlistToCart = () => {
     
     // Add each wishlist item to cart
     let addedCount = 0;
-    
-    wishlistItems.forEach(productId => {
+      wishlistItems.forEach(productId => {
       // Only add if not already in cart
       if (!cart[productId]) {
         cart[productId] = { 
-          quantity: 1, 
-          size: "250ml" // Default size - will be updated when full product data loads
+          quantity: 1
         };
         addedCount++;
       }

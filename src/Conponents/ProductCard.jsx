@@ -3,17 +3,19 @@ import { HeartIcon, EyeIcon } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
 import { contextData } from "../Contex";
 import { toast } from "react-toastify";
-import api from "../hooks/api";
 import { useNavigate, useLocation } from "react-router-dom";
 
 // Utility to remove null/undefined values from an object
+// eslint-disable-next-line no-unused-vars
 function removeNulls(obj) {
+  // eslint-disable-next-line no-unused-vars
   return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== null && v !== undefined));
 }
 
 const ProductCard = ({ products, categoryName, categoryID }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  // eslint-disable-next-line no-unused-vars
   const { userData } = useContext(contextData);
   const [wishlist, setWishlist] = useState({});
   const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -21,13 +23,13 @@ const ProductCard = ({ products, categoryName, categoryID }) => {
   useEffect(() => {
     const wishlistFromStorage = JSON.parse(localStorage.getItem("wishlist")) || {};
     setWishlist(wishlistFromStorage);
-  }, []);
-  const handleAddtoCart = async (productId, product) => {
+  }, []);  const handleAddtoCart = async (productId, product) => {
     const pid = typeof productId === 'string' ? productId : String(productId || '');
     const cart = JSON.parse(localStorage.getItem("addtocart")) || {};
 
     if (cart[pid]) {
       toast.info("Already product add to cart");
+      navigate('/add-to-cart');
       return;
     }
    
@@ -43,18 +45,25 @@ const ProductCard = ({ products, categoryName, categoryID }) => {
         variantSize = defaultVariant.quantity;
       }
       
-      // Create cart item with full product details
+      // Create cart item with full product details and store full product ID for API fetch
       cart[pid] = {
+        id: pid, // Store ID for fetching complete product details
         name: product.name,
         price: variantPrice,
         productId: product.productId || pid,
         quantity: 1,
         thumbnail: product.thumbnail || product.image,
-        variant: variantSize
+        variant: variantSize,
+        priceVariants: product.priceVariants || []
       };
       
       localStorage.setItem("addtocart", JSON.stringify(cart));
+      
+      // Dispatch custom event to update cart count in navbar
+      document.dispatchEvent(new Event('cartUpdated'));
+      
       toast.success("Added to cart");
+      navigate('/add-to-cart');
       
     } catch (error) {
       console.error("Error adding to cart:", error);

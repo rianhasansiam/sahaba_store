@@ -71,7 +71,6 @@ const Navbar = () => {
 
   // Get cart items count for badge
   const [cartItemsCount, setCartItemsCount] = useState(0);
-
   // Update cart count when localStorage changes
   useEffect(() => {
     const updateCartCount = () => {
@@ -89,12 +88,16 @@ const Navbar = () => {
 
     // Listen for localStorage changes
     window.addEventListener('storage', updateCartCount);
+    
+    // Listen for custom event for same-tab updates
+    document.addEventListener('cartUpdated', updateCartCount);
 
     // Set interval to check for changes (backup for same-tab updates)
     const interval = setInterval(updateCartCount, 2000);
 
     return () => {
       window.removeEventListener('storage', updateCartCount);
+      document.removeEventListener('cartUpdated', updateCartCount);
       clearInterval(interval);
     };
   }, []);
@@ -290,10 +293,9 @@ const Navbar = () => {
                 {wishlistItemsCount > 99 ? '99+' : wishlistItemsCount}
               </span>
             )}
-          </button>
-          <button
+          </button>          <button
             className='block relative'
-            onClick={() => navigate("/addtocart")}
+            onClick={() => navigate("/add-to-cart")}
           >
             <i className="fa-solid fa-cart-shopping mr-5 lg:mr-5 text-[#1e463e]"></i>
             {cartItemsCount > 0 && (

@@ -1,287 +1,184 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
-import { ShoppingCartIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
-import { toast } from 'react-toastify';
-import ProductSizeTag from './ProductSizeTag';
+// filepath: c:\Users\rianh\Desktop\Final\sahaba_store\src\Conponents\AddtocartProduct.jsx
+import React, { useEffect, useState } from 'react';
+import { useFetchData } from '../hooks/useFetchData';
+import { TrashIcon } from '@heroicons/react/24/outline';
 
-const AddtocartProduct = ({ item, quantity, onQuantityChange, onDelete }) => {
-  const [error, setError] = useState(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
-    // Available size options - memoized to avoid unnecessary re-renders
-  const availableSizes = useMemo(() => {
-    // If product has price variants, use those quantities
-    if (item.priceVariants && item.priceVariants.length > 0) {
-      return item.priceVariants.map(variant => variant.quantity);
-    }
-    // Otherwise use default sizes
-    return ["250 ml", "500 ml", "1000 ml"];
-  }, [item]);
+const AddtocartProduct = ({ productId, product, updateCart, removeFromCart }) => {
+  const [quantity, setQuantity] = useState(product.quantity || 1);
+  const [selectedVariant, setSelectedVariant] = useState(product.variant || '');
+  const [price, setPrice] = useState(product.price || 0);
+  const [fullProductData, setFullProductData] = useState(null);
   
-  // Get the quantity and size from the cart data
-  const [productQuantities, setProductQuantities] = useState(
-    quantity?.quantity || 1
+  // Fetch complete product data from API using the ID
+  const { data, isLoading, error } = useFetchData(
+    `product-${productId}`, 
+    `/products/${productId}`
   );
-  const [productSize, setProductSize] = useState(
-    quantity?.size && availableSizes.includes(quantity.size) ? quantity.size : availableSizes[0]
-  );
-    // Calculate price based on size and variants
-  const getPriceBasedOnSize = (basePrice, size, qty) => {
-    // If product has price variants, use those
-    if (item.priceVariants && item.priceVariants.length > 0) {
-      const variant = item.priceVariants.find(v => v.quantity === size);
-      if (variant) {
-        return (parseFloat(variant.price) * qty).toFixed(2);
-      }
-    }
-    
-    // Fallback to manual calculation for products without variants
-    const price = parseFloat(basePrice);
-    if (!price) return "0.00";
-    
-    let multiplier = 1;
-    switch(size) {
-      case "500 ml":
-        multiplier = 1.8; // 80% more for double size
-        break;
-      case "1000 ml":
-        multiplier = 3; // 3x price for 1 liter
-        break;
-      default: // 250 ml
-        multiplier = 1;
-    }
-    
-    return (price * multiplier * qty).toFixed(2);
-  };
-  // Update local state when quantity prop changes
+  
   useEffect(() => {
-    if (quantity) {
-      if (typeof quantity === 'object') {
-        setProductQuantities(quantity.quantity || 1);
-        // Only set size if it's one of our valid options
-        const size = quantity.size || "250 ml";
-        if (availableSizes.includes(size)) {
-          setProductSize(size);
-        } else {
-          setProductSize("250 ml"); // Default if invalid size
-        }
-      } else {
-        // Handle the case where quantity is a number (old format)
-        setProductQuantities(quantity || 1);
-        setProductSize("250 ml"); // Default size for old format
-      }
-      setHasChanges(false); // Reset changes flag on prop update
-    }
-  }, [quantity, availableSizes]);  // Update cart with current values and validate inventory
-  const updateCart = () => {
-    if (!onQuantityChange || !item?._id) return;
-    
-    // Validate against available inventory
-    if (item.availableAmount !== undefined && productQuantities > item.availableAmount) {
-      toast.error(`Only ${item.availableAmount} items available in stock`);
-      return;
-    }
-    
-    setIsSaving(true);
-    
-    // Update parent component state which will update localStorage
-    onQuantityChange(item._id, { quantity: productQuantities, size: productSize });
-    
-    toast.success("Cart updated");
-    setHasChanges(false);
-    
-    setTimeout(() => {
-      setIsSaving(false);
-    }, 1000);
-  };
-  const handleRemove = (id) => {
-    setError(null);
-
-    // Show confirmation dialog
-    if (window.confirm(`Are you sure you want to remove ${item.name} from your cart?`)) {
-      try {
-        // Only notify parent component - let the parent handle localStorage updates
-        if (onDelete) {
-          onDelete(id);
-          toast.success("Item removed from cart");
-        }
-        
-      } catch (error) {
-        console.error("Error removing item from cart:", error);
-        setError("Error removing item. Please try again.");
-        toast.error("Failed to remove item");
+    if (data) {
+      setFullProductData(data);
+      
+      // If we have price variants from the API and they weren't in local storage
+      if (data.priceVariants && data.priceVariants.length > 0 && !product.priceVariants) {
+        // Update local cart with price variants
+        updateCart(productId, { 
+          priceVariants: data.priceVariants 
+        });
       }
     }
+  }, [data, productId, updateCart, product]);
+  
+  useEffect(() => {
+    // Set initial quantity from local storage
+    setQuantity(product.quantity || 1);
+    
+    // Set initial variant from local storage
+    setSelectedVariant(product.variant || '');
+    
+    // Set initial price from local storage
+    setPrice(product.price || 0);
+  }, [product]);
+  
+  // Handle quantity change
+  const handleQuantityChange = (newQuantity) => {
+    // Validate quantity
+    if (newQuantity < 1) newQuantity = 1;
+    
+    // Update state
+    setQuantity(newQuantity);
+    
+    // Update cart in local storage
+    updateCart(productId, { quantity: newQuantity });
+    
+    // Dispatch event to update navbar cart count
+    document.dispatchEvent(new Event('cartUpdated'));
   };
-
-  const MAX_QUANTITY = 100;
-
-  const incresingQuantity = () => {
-    if (productQuantities >= MAX_QUANTITY) {
-      toast.error(`Maximum quantity is ${MAX_QUANTITY}`);
-      return;
-    }
+  
+  // Handle variant change
+  const handleVariantChange = (e) => {
+    const newVariant = e.target.value;
+    setSelectedVariant(newVariant);
     
-    // Check against available inventory
-    if (item.availableAmount && productQuantities >= item.availableAmount) {
-      toast.error(`Only ${item.availableAmount} items available in stock`);
-      return;
-    }
+    // Find the price for this variant
+    const variants = product.priceVariants || (fullProductData?.priceVariants || []);
+    const variantData = variants.find(v => v.quantity === newVariant);
     
-    setProductQuantities((prev) => prev + 1);
-    setHasChanges(true);
+    if (variantData) {
+      setPrice(variantData.price);
+      
+      // Update cart in local storage with new variant and price
+      updateCart(productId, { 
+        variant: newVariant,
+        price: variantData.price
+      });
+      
+      // Dispatch event to update navbar cart count
+      document.dispatchEvent(new Event('cartUpdated'));
+    }
+  };
+  
+  // Get available variants
+  const getVariants = () => {
+    return product.priceVariants || (fullProductData?.priceVariants || []);
+  };
+  
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-24 border rounded-lg mb-4">
+        <p>Loading product...</p>
+      </div>
+    );
   }
   
-  const decreasingQuantity = () => {
-    if (productQuantities <= 1) {
-      toast.error("Quantity cannot be less than 1");
-      return;
-    }
-    setProductQuantities((prev) => Math.max(1, prev - 1));
-    setHasChanges(true);  }
-    // This function is handled directly in the onChange of the select element
-
+  if (error) {
+    return (
+      <div className="border rounded-lg p-4 mb-4">
+        <p className="text-red-500">Error loading product details. {error.message}</p>
+      </div>
+    );
+  }
+  
+  const handleRemoveFromCart = () => {
+    removeFromCart(productId);
+    // Dispatch event to update navbar cart count
+    document.dispatchEvent(new Event('cartUpdated'));
+  };
+  
   return (
-    <div className="py-6 flex flex-col sm:flex-row">      <div className="flex-shrink-0 mb-4 sm:mb-0">
+    <div className="flex flex-col md:flex-row border rounded-lg p-4 mb-4 hover:shadow-md transition">
+      {/* Product Image */}
+      <div className="w-full md:w-1/4 mb-4 md:mb-0">
         <img
-          className="h-32 w-32 rounded-md object-cover"
-          src={item.thumbnail || item.image}
-          alt={item.name}
+          src={product.thumbnail || (fullProductData?.thumbnail || '')}
+          alt={product.name}
+          className="w-full h-32 object-cover rounded-md"
         />
       </div>
-      <div className="ml-0 sm:ml-4 flex-1">
-        <div className="flex justify-between">
-          <div>
-            <h3 className="text-lg font-medium text-gray-900">{item.name}</h3>
-            <p className="text-gray-500 text-sm">{item.shortDescription}</p>
-              {/* Size selector dropdown with price per unit */}
-            <div className="mt-3 flex flex-col sm:flex-row sm:items-end gap-3">
-              <div>
-                <label htmlFor={`size-${item._id}`} className="text-gray-600 text-sm font-medium block mb-1">Size:</label>
-                <div className="flex items-center">                  <select 
-                    id={`size-${item._id}`}
-                    value={productSize}
-                    onChange={(e) => {
-                      const newSize = e.target.value;
-                      setProductSize(newSize);
-                      setHasChanges(true);
-                    }}
-                    className="text-sm border border-gray-300 rounded-md py-1.5 px-2 focus:outline-none focus:ring-1 focus:ring-[#22874b] focus:border-[#22874b] transition-colors"
-                  >
-                    {availableSizes.map((size) => (
-                      <option key={size} value={size}>{size}</option>
-                    ))}
-                  </select>
-                  <ProductSizeTag size={productSize} className="ml-2" />
-                </div>
-              </div>
-              <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded-md">
-                <span className="block sm:inline font-medium">Unit Price: </span>
-                <span className="font-semibold text-[#22874b]">{getPriceBasedOnSize(item.price, productSize, 1)} BDT</span>
-              </div>
-            </div>
-              {item.availableAmount !== undefined && (
-              <div className={`mt-2 text-sm p-1 px-2 inline-block rounded-md ${
-                item.availableAmount <= 0 ? 'bg-red-50 text-red-600' : 
-                item.availableAmount < 5 ? 'bg-orange-50 text-orange-600' : 'bg-gray-50 text-gray-600'
-              }`}>
-                {item.availableAmount <= 0 ? 'Out of stock' : 
-                 item.availableAmount < 5 ? `Low stock: ${item.availableAmount} left` : 
-                 `Available: ${item.availableAmount}`}
-              </div>
-            )}
-          </div>          <button
-            className="text-gray-400 hover:text-red-500"
-            onClick={() => handleRemove(item._id)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                handleRemove(item._id);
-              }
-            }}
-            aria-label={`Remove ${item.name} from cart`}
-            tabIndex={0}
+      
+      {/* Product Details */}
+      <div className="w-full md:w-3/4 md:pl-6 flex flex-col justify-between">
+        <div className="flex justify-between mb-3">
+          <h3 className="text-lg font-semibold">{product.name}</h3>
+          <button
+            onClick={handleRemoveFromCart}
+            className="text-red-500 hover:text-red-700"
           >
-            <XMarkIcon className="h-5 w-5" />
+            <TrashIcon className="h-5 w-5" />
           </button>
         </div>
-
-        {error && (
-          <div className="mt-2 text-sm text-red-600">
-            <p>{error}</p>
-          </div>
-        )}
-          <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center mb-4 sm:mb-0">            <button
-              onClick={decreasingQuantity}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  decreasingQuantity();
-                }
-              }}
-              className="border border-gray-300 rounded-l-md px-3 py-1.5 hover:bg-gray-100 transition-colors"
-              aria-label="Decrease quantity"
-              tabIndex={0}
+        
+        <div className="mb-3">
+          <p className="text-sm text-gray-600 mb-2">
+            {fullProductData?.shortDescription || ''}
+          </p>
+          
+          {/* Product Variant Selector */}
+          {getVariants().length > 0 && (
+            <div className="mb-3">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Size
+              </label>
+              <select
+                value={selectedVariant}
+                onChange={handleVariantChange}
+                className="block w-full md:w-1/3 p-2 border border-gray-300 rounded-md"
+              >
+                {getVariants().map((variant, index) => (
+                  <option key={index} value={variant.quantity}>
+                    {variant.quantity}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+        
+        <div className="flex flex-wrap items-center justify-between mt-2">
+          <div className="flex items-center mb-2 md:mb-0">
+            <button
+              onClick={() => handleQuantityChange(quantity - 1)}
+              className="bg-gray-200 px-3 py-1 rounded-l-md"
             >
               -
             </button>
-
-            <span className={`border-t border-b border-gray-300 px-4 py-1.5 min-w-[40px] text-center font-medium ${
-              item.availableAmount && productQuantities > item.availableAmount ? 'text-red-600' : 
-              item.availableAmount && productQuantities === item.availableAmount ? 'text-orange-600' : ''
-            }`}>
-              {productQuantities}
-            </span>            <button
-              onClick={incresingQuantity}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  if (!(item.availableAmount && productQuantities >= item.availableAmount)) {
-                    incresingQuantity();
-                  }
-                }
-              }}
-              className={`border border-gray-300 rounded-r-md px-3 py-1.5 hover:bg-gray-100 transition-colors ${
-                item.availableAmount && productQuantities >= item.availableAmount ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-              aria-label="Increase quantity"
-              disabled={item.availableAmount && productQuantities >= item.availableAmount}
-              tabIndex={0}
+            <input
+              type="number"
+              min="1"
+              value={quantity}
+              onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
+              className="w-12 text-center border-t border-b py-1"
+            />
+            <button
+              onClick={() => handleQuantityChange(quantity + 1)}
+              className="bg-gray-200 px-3 py-1 rounded-r-md"
             >
               +
-            </button>{hasChanges && (
-                <button
-                  onClick={updateCart}
-                  disabled={isSaving}
-                  className="ml-3 bg-[#22874b] text-white px-3 py-1.5 rounded-md text-xs sm:text-sm font-medium flex items-center transition-colors hover:bg-[#1a6b3a]"
-                  aria-label="Save changes"
-                >
-                  {isSaving ? (
-                    <span className="flex items-center">
-                      <CheckCircleIcon className="h-4 w-4 mr-1" />
-                      Saved
-                    </span>
-                  ) : (
-                    <span className="flex items-center">
-                      <ShoppingCartIcon className="h-4 w-4 mr-1" />
-                      Save
-                    </span>
-                  )}
-                </button>
-              )}
-              {!hasChanges && !isSaving && (
-                <span className="ml-3 text-xs text-green-600 flex items-center">
-                  <CheckCircleIcon className="h-4 w-4 mr-1" />
-                  Up to date
-                </span>
-              )}
+            </button>
           </div>
-
-          <div className="flex items-center">
-            <span className="text-lg font-bold text-[#22874b]">
-              {getPriceBasedOnSize(item.price, productSize, productQuantities)} BDT
-            </span>
+          
+          <div className="font-semibold text-lg">
+            ${(price * quantity).toFixed(2)}
           </div>
         </div>
       </div>

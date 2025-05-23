@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { contextData } from '../Contex';
 import { usePostData } from '../hooks/usePostData';
@@ -15,18 +15,22 @@ const CheckoutPage = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const postOrder = usePostData('/add-order');
-
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  
+  // Check for applied coupon in localStorage
+  useEffect(() => {
+    const couponData = localStorage.getItem('appliedCoupon');
+    if (couponData) {
+      setAppliedCoupon(JSON.parse(couponData));
+    }
+  }, []);
   // Form state
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    email: '',
     phone: '',
     address: '',
-    city: '',
-    country: 'Bangladesh', // Default to Bangladesh
-    zipCode: '',
-    paymentMethod: 'cash-on-delivery' // Changed default to match your UI
+    paymentMethod: 'cash-on-delivery' // Default payment method
   });
 
   const [formErrors, setFormErrors] = useState({});
@@ -45,18 +49,13 @@ const CheckoutPage = () => {
 
   const validateForm = () => {
     const errors = {};
-    const requiredFields = ['firstName', 'email', 'phone', 'address', 'city', 'country'];
+    const requiredFields = ['firstName', 'phone', 'address'];
     
     requiredFields.forEach(field => {
       if (!formData[field]) {
         errors[field] = 'This field is required';
       }
     });
-
-    // Validate email format
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = 'Please enter a valid email';
-    }
 
     // Validate phone number (Bangladeshi format)
     if (formData.phone && !/^01[3-9]\d{8}$/.test(formData.phone)) {
@@ -86,26 +85,20 @@ const CheckoutPage = () => {
         text: 'Your cart is empty. Please add products before checkout',
       });
       return;
-    }
-
-    setIsSubmitting(true);
-
+    }    setIsSubmitting(true);    
     const orderData = {
       customer: {
         name: `${formData.firstName} ${formData.lastName}`.trim(),
-        email: formData.email,
         phone: formData.phone,
       },
       shipping: {
         address: formData.address,
-        city: formData.city,
-        country: formData.country,
-        zipCode: formData.zipCode,
       },
       payment: {
         method: formData.paymentMethod,
         status: formData.paymentMethod === 'cash-on-delivery' ? 'pending' : 'paid',
-      },      products: checkoutProducts.map(product => ({
+      },
+      products: checkoutProducts.map(product => ({
         productId: product.id || product.productId,
         name: product.name,
         price: product.price,
@@ -114,24 +107,30 @@ const CheckoutPage = () => {
         size: product.size || "250 ml", // Ensure size is included
         totalPrice: (product.price * product.quantity) // Calculate total price per product
       })),
+      coupon: appliedCoupon ? {
+        code: appliedCoupon.code,
+        discount: appliedCoupon.discount,
+        type: appliedCoupon.type
+      } : null,
+      subtotal: appliedCoupon ? finalPrice + appliedCoupon.discount : finalPrice,
       orderTotal: finalPrice,
-     
       createdAt: new Date().toISOString()
-    };    try {
+    };try {
       const response = await postOrder.mutateAsync(orderData);
-      
-      // Clear cart on successful order
+        // Clear cart on successful order
       if (clearCart) {
         clearCart();
-      }      Swal.fire({
+        localStorage.removeItem('appliedCoupon'); // Clear applied coupon data
+      }      
+      
+      Swal.fire({
         icon: 'success',
         title: 'Order Placed!',
         text: `Your order #${response?.data?._id || ''} has been placed successfully`,
         showCancelButton: true,
         confirmButtonText: 'View Order Details',
         cancelButtonText: 'Continue Shopping'
-      }).then((result) => {
-        if (result.isConfirmed) {
+      }).then((result) => {        if (result.isConfirmed) {
           navigate('/orderOverview', { state: { order: response?.data || orderData } });
         } else {
           navigate('/');
@@ -143,7 +142,7 @@ const CheckoutPage = () => {
       Swal.fire({
         icon: 'error',
         title: 'Order Failed',
-        text: 'There was an error processing your order. Please try again.',
+        text: error.response?.data?.message || 'There was an error processing your order. Please try again.',
       });
     } finally {
       setIsSubmitting(false);
@@ -206,7 +205,7 @@ const CheckoutPage = () => {
                       name="firstName"
                       value={formData.firstName}
                       onChange={handleChange}
-                      className={`w-full border ${formErrors.firstName ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#22874b]`}
+                      className={`w-full  border ${formErrors.firstName ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#22874b] bg-gray-100 focus:bg-white`}
                       required
                     />
                     {formErrors.firstName && (
@@ -223,12 +222,12 @@ const CheckoutPage = () => {
                       name="lastName"
                       value={formData.lastName}
                       onChange={handleChange}
-                      className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#22874b]"
+                      className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#22874b] bg-gray-100 focus:bg-white"
                     />
                   </div>
                 </div>
 
-                <div>
+                {/* <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                     Email Address *
                   </label>
@@ -238,13 +237,13 @@ const CheckoutPage = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className={`w-full border ${formErrors.email ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#22874b]`}
+                    className={`w-full border ${formErrors.email ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#22874b] bg-gray-100 focus:bg-white`}
                     required
                   />
                   {formErrors.email && (
                     <p className="mt-1 text-sm text-red-600">{formErrors.email}</p>
                   )}
-                </div>
+                </div> */}
 
                 <div>
                   <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
@@ -256,7 +255,7 @@ const CheckoutPage = () => {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    className={`w-full border ${formErrors.phone ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#22874b]`}
+                    className={`w-full border ${formErrors.phone ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#22874b] bg-gray-100 focus:bg-white`}
                     required
                   />
                   {formErrors.phone && (
@@ -266,7 +265,7 @@ const CheckoutPage = () => {
 
                 <div>
                   <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
-                    Street Address *
+                    Address *
                   </label>
                   <input
                     type="text"
@@ -274,18 +273,19 @@ const CheckoutPage = () => {
                     name="address"
                     value={formData.address}
                     onChange={handleChange}
-                    className={`w-full border ${formErrors.address ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#22874b]`}
+                    className={`w-full border ${formErrors.address ? 'border-red-500' : 'border-gray-300'} rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#22874b] bg-gray-100 focus:bg-white`}
                     required
                   />
                   {formErrors.address && (
                     <p className="mt-1 text-sm text-red-600">{formErrors.address}</p>
                   )}
                 </div>
-
+{/* 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
                   <div>
                     <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-                      City *
+                      Police Station *
                     </label>
                     <input
                       type="text"
@@ -331,7 +331,7 @@ const CheckoutPage = () => {
                       className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-[#22874b]"
                     />
                   </div>
-                </div>
+                </div> */}
 
                 <div className="mt-6">
                   <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
@@ -398,14 +398,20 @@ const CheckoutPage = () => {
                     </div>
                   </div>
                 ))}
-              </div>
-
-              <div className="mt-6 border-t border-gray-200 pt-6">
+              </div>              <div className="mt-6 border-t border-gray-200 pt-6">
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Subtotal</span>
-                    <span className="text-sm font-medium">৳{finalPrice.toFixed(2)}</span>
+                    <span className="text-sm font-medium">৳{(appliedCoupon ? finalPrice + appliedCoupon.discount : finalPrice).toFixed(2)}</span>
                   </div>
+                  
+                  {appliedCoupon && (
+                    <div className="flex justify-between text-green-600">
+                      <span className="text-sm">Coupon Discount ({appliedCoupon.code})</span>
+                      <span className="text-sm font-medium">-৳{appliedCoupon.discount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Shipping</span>
                     <span className="text-sm font-medium">৳0.00</span>

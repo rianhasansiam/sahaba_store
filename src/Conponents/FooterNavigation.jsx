@@ -2,11 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { FiHome, FiHeart, FiShoppingCart, FiUser } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 
-const FooterNavigation = () => {
-  const links = [
+const FooterNavigation = () => {  const links = [
     { name: "Home", icon: <FiHome size={20} />, path: "/" },
     { name: "Wishlist", icon: <FiHeart size={20} />, path: "/wishlist" },
-    { name: "Cart", icon: <FiShoppingCart size={20} />, path: "/addtocart" },
+    { name: "Cart", icon: <FiShoppingCart size={20} />, path: "/add-to-cart" },
  
   ];
 

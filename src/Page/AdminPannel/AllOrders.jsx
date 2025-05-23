@@ -14,14 +14,13 @@ const AllOrders = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const orders = data && Array.isArray(data.orders) ? data.orders : [];
-
-  // Filter orders by customer name, email, or order ID
+  // Filter orders by customer name, phone, or order ID
   const filteredOrders = orders.filter(order => {
     const customer = order.customer || {};
     const id = order._id ? String(order._id) : '';
     return (
       (customer.name && customer.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (customer.email && customer.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (customer.phone && customer.phone.toLowerCase().includes(searchTerm.toLowerCase())) ||
       id.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
@@ -68,12 +67,11 @@ const AllOrders = () => {
   return (
     <div className="p-4">
       <h1 className="text-3xl font-bold mb-6">Order Management</h1>
-      {/* Search Bar */}
-      <div className="mb-4 flex items-center gap-2 max-w-md">
+      {/* Search Bar */}      <div className="mb-4 flex items-center gap-2 max-w-md">
         <FaSearch className="text-gray-500" />
         <input
           type="text"
-          placeholder="Search by customer, email, or order ID..."
+          placeholder="Search by customer name, phone, or order ID..."
           className="w-full px-4 py-2 border rounded-md"
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
@@ -100,29 +98,25 @@ const AllOrders = () => {
                 <tr key={order._id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     #{order._id ? String(order._id).slice(-8) : '--'}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
+                  </td>                  <td className="px-6 py-4 text-sm text-gray-500">
                     <div className="font-medium text-gray-900">{order.customer?.name || 'N/A'}</div>
-                    <div className="text-xs text-gray-500">{order.customer?.email || 'No email'}</div>
                     <div className="text-xs text-gray-500">{order.customer?.phone || 'No phone'}</div>
                     {order.shipping && (
                       <div className="mt-1 text-xs text-gray-400">
                         <div>{order.shipping.address || ''}</div>
-                        <div>{order.shipping.city || ''}{order.shipping.city && order.shipping.country ? ', ' : ''}{order.shipping.country || ''}</div>
-                        <div>{order.shipping.zipCode ? 'ZIP: ' + order.shipping.zipCode : ''}</div>
                       </div>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-BD') : ''}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {order.products?.length > 0 ? (
-                      <ul className="list-disc pl-5">                        {order.products.map((product, idx) => (
+                  <td className="px-6 py-4 text-sm text-gray-500">                    {order.products?.length > 0 ? (
+                      <ul className="list-disc pl-5">
+                        {order.products.map((product, idx) => (
                           <li key={idx} className="mb-1">
                             <span className="inline-flex items-center">
-                              <span className="bg-gray-100 text-gray-800 text-xs px-2  py-0.5 rounded-full mr-1">
-                                {product.size || "Standard"}
+                              <span className="bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded-full mr-1">
+                                {product.variant || product.size || "250ml"}
                               </span>
                               <span>{product.name}</span>
                               <span className="ml-1 text-gray-600">(×{product.quantity})</span>

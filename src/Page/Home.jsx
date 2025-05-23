@@ -3,7 +3,9 @@ import React, { useEffect } from 'react';
 import { useFetchData } from '../hooks/useFetchData';
 import HomepageCard from '../Conponents/HomepageCard';
 import Banner from '../Conponents/Banner';
-
+import details1 from '../assets/img/details1.jpg';
+import details2 from '../assets/img/details2.png';  
+import details3 from '../assets/img/details3.png';
 
 const Home = () => {
   const {
@@ -60,6 +62,40 @@ const Home = () => {
             <HomepageCard key={product._id} product={product} />
           ))}
         </div>
+      </div>
+
+
+
+
+      <div className='grid grid-cols-1 lg:grid-cols-3  mt-10 container max-sm:w-[95vw] mx-auto '>
+      
+        <div className='flex  items-center justify-start'>
+          <img className='w-28' src={details3} alt="" />
+          <div>
+      
+          <h2 className='font-bold text-lg'>নিরাপদ পেমেন্ট</h2>
+          <p className='text-sm'>বিভিন্ন পেমেন্ট পদ্ধতি থেকে বেছে নিন</p>
+          </div>
+        </div>
+        <div className='flex justify-start items-center'>
+          <img className='w-28' src={details2} alt="" />
+          <div>
+      
+          <h2 className='font-bold text-lg'>ডেলেভারি</h2>
+          <p className='text-sm'>ঢাকা সিটির ভিতরে ১-২ দিন ঢাকা সিটির বাহিরে ২-৩ দিনের ভিতরে আপনার পন্য পৌছে যাবে
+      ১০০% ন্যাচারাল</p>
+          </div>
+        </div>
+        <div className='flex justify-start items-center'>
+          <img className='w-28' src={details1} alt="" />
+          <div>
+      
+          <h2 className='font-bold text-lg'>১০০% ন্যাচারাল</h2>
+          <p className='text-sm'>প্রাকৃতিক উপাদান ব্যবহার করতে আমরা প্রতিশ্রুতিবদ্ধ</p>
+          </div>
+        </div>
+      
+      
       </div>
     </div>
   );

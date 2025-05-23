@@ -15,12 +15,11 @@ const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
-  const [selectedVariant, setSelectedVariant] = useState(null);
-  const { data: product, isLoading, error } = useFetchData(
+  const [selectedVariant, setSelectedVariant] = useState(null);  const { data: product, isLoading, error } = useFetchData(
     'product',
     `/products/${id}`
   );
-  const { userData, setCheckoutProducts, setFinalPrice } = useContext(contextData);
+  const { userData } = useContext(contextData);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isBuyingNow, setIsBuyingNow] = useState(false);
@@ -189,9 +188,8 @@ const ProductDetails = () => {
     } finally {
       setIsAddingToCart(false);
     }
-  };
-  // Handler for Buy Now button
-  const handleBuyNow = () => {
+  };  // Handler for Buy Now button
+  const handleBuyNow = async () => {
     if (!product) return;
     
     if (product.availableAmount <= 0) {
@@ -212,33 +210,39 @@ const ProductDetails = () => {
     
     setIsBuyingNow(true);
     try {
-      // Create a checkout product item with the current selection
-      const checkoutItem = {
-        image: product.thumbnail,
-        price: selectedVariant ? selectedVariant.price : currentPrice,
-        productId: product.productId || product._id,
-        id: product._id,
-        name: product.name,
+      // First add the product to cart
+      // Get current cart data
+      const cartData = JSON.parse(localStorage.getItem('addtocart')) || {};
+      
+      // Create cart item with the current selection
+      const newCartItem = {
         quantity: quantity,
-        size: selectedVariant ? selectedVariant.quantity : null,
-        totalPrice: (selectedVariant ? selectedVariant.price : currentPrice) * quantity
+        variant: selectedVariant ? selectedVariant.quantity : null,
+        price: selectedVariant ? selectedVariant.price : currentPrice,
+        name: product.name,
+        thumbnail: product.thumbnail,
+        productId: product.productId
       };
       
-      // Set this as the only checkout product in context
-      setCheckoutProducts([checkoutItem]);
+      // Update cart with the new item
+      cartData[product._id] = newCartItem;
       
-      // Set the final price
-      setFinalPrice(checkoutItem.totalPrice);
+      // Save to localStorage
+      localStorage.setItem('addtocart', JSON.stringify(cartData));
+      
+      // Trigger storage event for other components to detect the change
+      window.dispatchEvent(new Event('storage'));
       
       // Show success message
-      toast.success('Proceeding to checkout...');
+      toast.success('Product added to cart. Redirecting to cart...');
       
-      // Redirect to checkout page
-      navigate('/checkout');
+      // Redirect to cart page
+      navigate('/addtocart');
       
     } catch (err) {
       console.error('Buy now error:', err);
-      toast.error('Failed to proceed to checkout');
+      toast.error('Failed to add product to cart');
+    } finally {
       setIsBuyingNow(false);
     }
   };
@@ -309,24 +313,15 @@ const ProductDetails = () => {
             {product.price && (
               <div>
                 <span className="text-xl font-bold text-gray-700">
-                  Price Range: {product.price} BDT
+                  {product.price} BDT
                 </span>
               </div>
             )}
             
-            {selectedVariant && (
-              <div className="mt-2">
-                <span className="text-3xl font-bold text-gray-900">
-                  {selectedVariant.price.toFixed(2)} BDT
-                </span>
-                <p className="text-sm text-gray-500 mt-1">
-                  Selected variant: {selectedVariant.quantity}
-                </p>
-              </div>
-            )}
+           
           </div>
 
-          <p className="text-gray-700 mb-6">{product.description}</p>
+          {/* <p className="text-gray-700 mb-6">{product.description}</p> */}
 
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-2">Short Description</h3>
@@ -334,7 +329,7 @@ const ProductDetails = () => {
           </div>
 
           <div className="mb-6">
-            <div className="flex items-center mb-2">
+            {/* <div className="flex items-center mb-2">
               <span className="font-medium mr-2">Availability:</span>
               <span className={`font-semibold ${
                 product.availableAmount > 0 ? 'text-green-600' : 'text-red-600'
@@ -343,10 +338,21 @@ const ProductDetails = () => {
                   ? `In Stock (${product.availableAmount} available)` 
                   : 'Out of Stock'}
               </span>
-            </div>
+            </div> */}
+
+
             <div className="font-medium mb-2">Product ID: <span className="font-normal">{product.productId}</span></div>
           </div>
-          
+
+
+           {selectedVariant && (
+              <div className="my-4">
+                <span className="text-3xl font-bold text-gray-900">
+                  {selectedVariant.price.toFixed(2)} BDT
+                </span>
+                
+              </div>
+            )}
           {/* Variant Selection */}
           {product.priceVariants && product.priceVariants.length > 0 && (
             <div className="mb-6">
@@ -414,8 +420,7 @@ const ProductDetails = () => {
                 product.availableAmount <= 0 
                   ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-[#e75b3a] hover:bg-[#d14e2f] font-medium'
-              }`}
-              disabled={product.availableAmount <= 0 || isBuyingNow}
+              }`}              disabled={product.availableAmount <= 0 || isBuyingNow}
             >
               {isBuyingNow ? 'Processing...' : (
                 <>
@@ -455,7 +460,7 @@ const ProductDetails = () => {
 <div className='grid grid-cols-1 lg:grid-cols-3  mt-10  '>
 
   <div className='flex  items-center justify-start'>
-    <img className='w-28' src={details1} alt="" />
+    <img className='w-28' src={details3} alt="" />
     <div>
 
     <h2 className='font-bold text-lg'>নিরাপদ পেমেন্ট</h2>
@@ -472,7 +477,7 @@ const ProductDetails = () => {
     </div>
   </div>
   <div className='flex justify-start items-center'>
-    <img className='w-28' src={details3} alt="" />
+    <img className='w-28' src={details1} alt="" />
     <div>
 
     <h2 className='font-bold text-lg'>১০০% ন্যাচারাল</h2>

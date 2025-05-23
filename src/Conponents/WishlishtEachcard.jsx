@@ -40,9 +40,7 @@ const WishlishtEachcard = ({ product, id, setreload, reload }) => {
         const defaultVariant = product.priceVariants && product.priceVariants.length > 0 
           ? product.priceVariants[0]
           : null;
-        
-        // Get size and base price
-        const size = defaultVariant ? defaultVariant.quantity : "250ml";
+          // Get base price
         const basePrice = defaultVariant ? defaultVariant.price : parseFloat(product.price);
         
         // Create cart item with full product details
@@ -51,7 +49,6 @@ const WishlishtEachcard = ({ product, id, setreload, reload }) => {
           price: basePrice,
           productId: product.productId || product._id,
           quantity: 1,
-          size: size,
           thumbnail: product.thumbnail || product.image
         };
         

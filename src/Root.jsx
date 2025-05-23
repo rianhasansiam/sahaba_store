@@ -61,9 +61,12 @@ const Root = createBrowserRouter([
       {
         path: '/register',
         element: <Register></Register>
+      },      {
+        path: '/addtocart',
+        element: <AddToCart></AddToCart>
       },
       {
-        path: '/addtocart',
+        path: '/add-to-cart',
         element: <AddToCart></AddToCart>
       },
       {

@@ -104,9 +104,7 @@ const Wishlist = () => {
         const defaultVariant = product.priceVariants && product.priceVariants.length > 0 
           ? product.priceVariants[0]
           : null;
-          
-        // Get size and price
-        const size = defaultVariant ? defaultVariant.quantity : "250ml";
+            // Get price
         const price = defaultVariant ? parseFloat(defaultVariant.price) : parseFloat(product.price);
         
         return {
@@ -116,7 +114,6 @@ const Wishlist = () => {
           id: product._id,
           name: product.name,
           quantity: 1,
-          size: size,
           totalPrice: price
         };
       });
@@ -157,13 +154,13 @@ const Wishlist = () => {
             <div className="bg-white rounded-lg shadow-md p-6">              <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-semibold">Your Wishlist ({itemCount})</h2>
                 <div className="flex space-x-3">
-                  <button
+                  {/* <button
                     className="text-[#22874b] hover:text-[#135a6e] flex items-center"
                     onClick={handleMoveAllToCart}
                     disabled={loadingProducts || !wishlistItems.length}
                   >
                     Move all to cart <ShoppingCartIcon className="ml-2 h-5 w-5" />
-                  </button>
+                  </button> */}
                   <button
                     className="text-[#e75b3a] hover:text-[#d14e2f] flex items-center"
                     onClick={handleBuyAll}
@@ -195,7 +192,8 @@ const Wishlist = () => {
           </div>
 
           {/* Summary */}
-          {wishlistItems.length > 0 && (
+
+          {/* {wishlistItems.length > 0 && (
             <div className="lg:col-span-1">
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h2 className="text-xl font-semibold mb-4">Summary</h2>
@@ -224,7 +222,7 @@ const Wishlist = () => {
                 </div>
               </div>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>
