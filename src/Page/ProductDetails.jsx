@@ -19,7 +19,7 @@ const ProductDetails = () => {
     'product',
     `/products/${id}`
   );
-  const { userData } = useContext(contextData);
+  const { userData, setCheckoutProducts, setFinalPrice } = useContext(contextData);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isBuyingNow, setIsBuyingNow] = useState(false);
@@ -230,18 +230,34 @@ const ProductDetails = () => {
       // Save to localStorage
       localStorage.setItem('addtocart', JSON.stringify(cartData));
       
+      // Create checkout products array for direct checkout
+      const checkoutProducts = [{
+        id: product._id,
+        productId: product.productId,
+        name: product.name,
+        price: selectedVariant ? selectedVariant.price : currentPrice,
+        quantity: quantity,
+        image: product.thumbnail,
+        size: selectedVariant ? selectedVariant.quantity : null,
+        totalPrice: (selectedVariant ? selectedVariant.price : currentPrice) * quantity
+      }];
+      
+      // Set the checkout products in context
+      setCheckoutProducts(checkoutProducts);
+      setFinalPrice((selectedVariant ? selectedVariant.price : currentPrice) * quantity);
+      
       // Trigger storage event for other components to detect the change
       window.dispatchEvent(new Event('storage'));
       
       // Show success message
-      toast.success('Product added to cart. Redirecting to cart...');
+      toast.success('Redirecting to checkout...');
       
-      // Redirect to cart page
-      navigate('/addtocart');
+      // Redirect directly to checkout page
+      navigate('/checkout');
       
     } catch (err) {
       console.error('Buy now error:', err);
-      toast.error('Failed to add product to cart');
+      toast.error('Failed to proceed to checkout');
     } finally {
       setIsBuyingNow(false);
     }
@@ -324,7 +340,7 @@ const ProductDetails = () => {
           {/* <p className="text-gray-700 mb-6">{product.description}</p> */}
 
           <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-2">Short Description</h3>
+            {/* <h3 className="text-lg font-semibold mb-2">Short Description</h3> */}
             <p className="text-gray-600">{product.shortDescription}</p>
           </div>
 
@@ -449,7 +465,7 @@ const ProductDetails = () => {
           </nav>
         </div>
         <div className="py-8">
-          <h3 className="text-lg font-semibold mb-4">Full Description</h3>
+          {/* <h3 className="text-lg font-semibold mb-4">Full Description</h3> */}
           <p className="text-gray-700 whitespace-pre-line">{product.description}</p>
         </div>
       </div>

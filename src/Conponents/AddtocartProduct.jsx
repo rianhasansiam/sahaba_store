@@ -178,7 +178,7 @@ const AddtocartProduct = ({ productId, product, updateCart, removeFromCart }) =>
           </div>
           
           <div className="font-semibold text-lg">
-            ${(price * quantity).toFixed(2)}
+            {(price * quantity).toFixed(2)} BDT
           </div>
         </div>
       </div>

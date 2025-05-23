@@ -4,6 +4,7 @@ import { contextData } from '../Contex';
 import { usePostData } from '../hooks/usePostData';
 import Swal from 'sweetalert2';
 import ProductSizeTag from '../Conponents/ProductSizeTag';
+import { toast } from 'react-toastify';
 
 const CheckoutPage = () => {
   const { 
@@ -11,19 +12,39 @@ const CheckoutPage = () => {
     checkoutProducts,
     clearCart // Add this to your context if not already present
   } = useContext(contextData);
-  
-  const navigate = useNavigate();
+    const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const postOrder = usePostData('/add-order');
   const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [coupons, setCoupons] = useState([]);
+  const [couponCode, setCouponCode] = useState('');
+  const [discount, setDiscount] = useState(0);
+  const [couponError, setCouponError] = useState('');
+  const [calculatedTotal, setCalculatedTotal] = useState(finalPrice);
   
+  // Fetch coupons from API
+  const fetchCoupons = async () => {
+    try {
+      const response = await fetch('https://sahaba-store-server.vercel.app/coupons');
+      const data = await response.json();
+      setCoupons(data);
+    } catch (error) {
+      console.error('Failed to fetch coupons:', error);
+    }
+  };
   // Check for applied coupon in localStorage
   useEffect(() => {
+    fetchCoupons();
     const couponData = localStorage.getItem('appliedCoupon');
     if (couponData) {
-      setAppliedCoupon(JSON.parse(couponData));
+      const savedCoupon = JSON.parse(couponData);
+      setAppliedCoupon(savedCoupon);
+      setDiscount(savedCoupon.discount);
+    } else {
+      setCalculatedTotal(finalPrice);
     }
-  }, []);
+  }, [finalPrice]);
+
   // Form state
   const [formData, setFormData] = useState({
     firstName: '',
@@ -34,6 +55,73 @@ const CheckoutPage = () => {
   });
 
   const [formErrors, setFormErrors] = useState({});
+  // Apply coupon code
+  const applyCoupon = () => {
+    setCouponError('');
+    
+    if (!couponCode.trim()) {
+      setCouponError('Please enter a coupon code');
+      return;
+    }
+
+    const foundCoupon = coupons.find(coupon => 
+      coupon.code.toLowerCase() === couponCode.trim().toLowerCase()
+    );
+
+    if (!foundCoupon) {
+      setCouponError('Invalid coupon code');
+      return;
+    }
+
+    if (foundCoupon.status !== 'active') {
+      setCouponError('This coupon is not active');
+      return;
+    }
+
+    // Calculate subtotal to check minimum order
+    const subtotal = checkoutProducts.reduce((sum, item) => {
+      return sum + (Number(item.price) * item.quantity);
+    }, 0);
+
+    if (subtotal < foundCoupon.minOrder) {
+      setCouponError(`Minimum order amount for this coupon is ৳${foundCoupon.minOrder}`);
+      return;
+    }
+
+    // Calculate discount amount
+    let discountAmount = 0;
+    if (foundCoupon.type === 'fixed') {
+      discountAmount = foundCoupon.discount;
+    } else if (foundCoupon.type === 'percentage') {
+      discountAmount = subtotal * (foundCoupon.discount / 100);
+    }
+    
+    setAppliedCoupon(foundCoupon);
+    setDiscount(discountAmount);
+    
+    // Calculate new total with discount
+    const newTotal = subtotal - discountAmount;
+    setCalculatedTotal(newTotal > 0 ? newTotal : 0);
+    
+    // Save coupon to localStorage
+    localStorage.setItem('appliedCoupon', JSON.stringify({
+      code: foundCoupon.code,
+      discount: discountAmount,
+      type: foundCoupon.type
+    }));
+    
+    toast.success('Coupon applied successfully!');
+  };
+
+  // Remove applied coupon
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setDiscount(0);
+    setCouponCode('');
+    setCalculatedTotal(finalPrice);
+    localStorage.removeItem('appliedCoupon');
+    toast.info('Coupon removed');
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -85,8 +173,7 @@ const CheckoutPage = () => {
         text: 'Your cart is empty. Please add products before checkout',
       });
       return;
-    }    setIsSubmitting(true);    
-    const orderData = {
+    }    setIsSubmitting(true);      const orderData = {
       customer: {
         name: `${formData.firstName} ${formData.lastName}`.trim(),
         phone: formData.phone,
@@ -109,11 +196,11 @@ const CheckoutPage = () => {
       })),
       coupon: appliedCoupon ? {
         code: appliedCoupon.code,
-        discount: appliedCoupon.discount,
+        discount: discount,
         type: appliedCoupon.type
       } : null,
-      subtotal: appliedCoupon ? finalPrice + appliedCoupon.discount : finalPrice,
-      orderTotal: finalPrice,
+      subtotal: appliedCoupon ? calculatedTotal + discount : calculatedTotal,
+      orderTotal: calculatedTotal,
       createdAt: new Date().toISOString()
     };try {
       const response = await postOrder.mutateAsync(orderData);
@@ -148,6 +235,18 @@ const CheckoutPage = () => {
       setIsSubmitting(false);
     }
   };
+
+  // Effect to recalculate total when discount or products change
+  useEffect(() => {
+    if (checkoutProducts.length > 0) {
+      const subtotal = checkoutProducts.reduce((sum, item) => {
+        return sum + (Number(item.price) * item.quantity);
+      }, 0);
+      
+      const total = subtotal - discount;
+      setCalculatedTotal(total > 0 ? total : 0);
+    }
+  }, [checkoutProducts, discount]);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
@@ -402,13 +501,47 @@ const CheckoutPage = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Subtotal</span>
-                    <span className="text-sm font-medium">৳{(appliedCoupon ? finalPrice + appliedCoupon.discount : finalPrice).toFixed(2)}</span>
+                    <span className="text-sm font-medium">৳{(appliedCoupon ? calculatedTotal + discount : calculatedTotal).toFixed(2)}</span>
                   </div>
                   
-                  {appliedCoupon && (
+                  {/* Coupon Code Section */}
+                  {!appliedCoupon ? (
+                    <div className="py-3">
+                      <label htmlFor="coupon" className="block text-sm font-medium text-gray-700 mb-1">
+                        Have a coupon?
+                      </label>
+                      <div className="flex">
+                        <input
+                          type="text"
+                          id="coupon"
+                          value={couponCode}
+                          onChange={(e) => setCouponCode(e.target.value)}
+                          placeholder="Enter coupon code"
+                          className="flex-1 border border-gray-300 rounded-l-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#22874b]"
+                        />
+                        <button
+                          onClick={applyCoupon}
+                          className="bg-[#22874b] text-white px-3 py-2 rounded-r-md text-sm hover:bg-[#1c6e3c] transition"
+                        >
+                          Apply
+                        </button>
+                      </div>
+                      {couponError && (
+                        <p className="mt-1 text-xs text-red-600">{couponError}</p>
+                      )}
+                    </div>
+                  ) : (
                     <div className="flex justify-between text-green-600">
                       <span className="text-sm">Coupon Discount ({appliedCoupon.code})</span>
-                      <span className="text-sm font-medium">-৳{appliedCoupon.discount.toFixed(2)}</span>
+                      <div className="flex items-center">
+                        <span className="text-sm font-medium">-৳{discount.toFixed(2)}</span>
+                        <button 
+                          onClick={removeCoupon}
+                          className="ml-2 text-xs text-red-500 hover:text-red-700"
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </div>
                   )}
                   
@@ -418,7 +551,7 @@ const CheckoutPage = () => {
                   </div>
                   <div className="flex justify-between border-t border-gray-200 pt-3">
                     <span className="text-base font-medium">Total</span>
-                    <span className="text-base font-medium">৳{finalPrice.toFixed(2)}</span>
+                    <span className="text-base font-medium">৳{calculatedTotal.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
