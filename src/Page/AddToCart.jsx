@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import AddtocartProduct from '../Conponents/AddtocartProduct';
 import { toast } from 'react-toastify';
 import { contextData } from '../Contex';
+import LoadingPage from '../Conponents/LoadingPage';
 
 const AddToCart = () => {
   const navigate = useNavigate();
@@ -91,7 +92,7 @@ const AddToCart = () => {
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    return <LoadingPage></LoadingPage>
   }
 
   return (
