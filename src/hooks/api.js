@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://sahaba-store-server.vercel.app',
+  baseURL: 'https://api.sahaba-store.shop',
   timeout: 10000, // 10 seconds timeout
   headers: {
     'Content-Type': 'application/json',
